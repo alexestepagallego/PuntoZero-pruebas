@@ -1,0 +1,30 @@
+<!-- Marca de PuntoZero, blanca sobre transparente. Misma geometría que el
+     SVG del loader y que el logo 3D: una sola definición para todo. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <defs>
+  <!-- En el logo original los huecos del donut de origen y del nodo
+  central están calados también a través de la flecha. Sin esta
+  máscara el trazo de la flecha los taparía. -->
+  <mask id="h">
+  <rect width="240" height="240" fill="#fff"/>
+  <circle cx="62.15" cy="182.3" r="9.5" fill="#000"/>
+  <circle cx="172.47" cy="63.67" r="7" fill="#000"/>
+  </mask>
+  </defs>
+  <g fill="none" stroke="#ffffff" stroke-width="14.0">
+  <path class="pz-ring" d="M56.42 170.02A80.9 80.9 0 0 1 165.28 52.96"/>
+  <path class="pz-ring" d="M74.72 187.04A80.9 80.9 0 0 0 183.58 69.98"/>
+  <path class="pz-oval" d="M73.96 151.15A51.1 71.8 0 0 1 153.43 65.7"/>
+  <path class="pz-oval" d="M86.57 174.3A51.1 71.8 0 0 0 166.04 88.85"/>
+  <path class="pz-shaft" stroke-width="14.4" mask="url(#h)" d="M62.15 182.3L190.17 44.63"/>
+  <circle class="pz-origin" cx="62.15" cy="182.3" r="14.75" stroke-width="10.5"/>
+  <circle class="pz-hub" cx="172.47" cy="63.67" r="10.5" stroke-width="7"/>
+  <circle class="pz-node" cx="120.0" cy="33.9" r="5.5" stroke-width="4.6"/>
+  <circle class="pz-node" cx="33.9" cy="120.0" r="5.5" stroke-width="4.6"/>
+  <circle class="pz-node" cx="206.1" cy="120.0" r="5.5" stroke-width="4.6"/>
+  <circle class="pz-node" cx="120.0" cy="206.1" r="5.5" stroke-width="4.6"/>
+  <circle class="pz-node" cx="68.9" cy="120.0" r="6.1" stroke-width="5.8"/>
+  <circle class="pz-node" cx="171.1" cy="120.0" r="6.1" stroke-width="5.8"/>
+  </g>
+  <polygon class="pz-head" fill="#ffffff" points="208.7,24.71 203.36,56.88 176.99,32.37"/>
+</svg>

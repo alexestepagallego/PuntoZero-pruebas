@@ -73,7 +73,8 @@
         return f;
     }
 
-    window.pzCrearLogo3D = function (THREE, material) {
+    window.pzCrearLogo3D = function (THREE, material, opciones) {
+        var cfg = Object.assign({ curveSegments: 26, bevel: true }, opciones || {});
         var formas = [];
 
         // Anillo exterior, partido en dos por la flecha.
@@ -114,11 +115,11 @@
 
         var geo = new THREE.ExtrudeGeometry(formas, {
             depth: 13,
-            bevelEnabled: true,
+            bevelEnabled: cfg.bevel,
             bevelThickness: 1.4,
             bevelSize: 1.1,
             bevelSegments: 2,
-            curveSegments: 26
+            curveSegments: cfg.curveSegments
         });
         geo.center();
 

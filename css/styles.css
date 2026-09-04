@@ -2527,3 +2527,183 @@ button {
 @media (prefers-color-scheme: light) {
     .ej-cargando-marca { color: inherit; }
 }
+
+/* =========================================================================
+   PORTADA MÓVIL CON SCROLL  (< 1024px)
+   -------------------------------------------------------------------------
+   Todo lo de aquí va encerrado en max-width: 1023px a propósito: la versión
+   de escritorio está cerrada y no debe verse afectada por nada de esto.
+
+   El móvil era una app de pantallas: #mobile-app medía 100vh con overflow
+   hidden y #app-content hacía de scroller interno. Se pasa a scroll del
+   documento —así el navegador esconde su barra de direcciones al bajar, cosa
+   que un scroller interno no consigue— con la cabecera pegada arriba.
+   ========================================================================= */
+@media (max-width: 1023px) {
+
+    #mobile-app {
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+    }
+
+    .mobile-header {
+        position: sticky;
+        top: 0;
+        z-index: 60;
+        background: rgba(10, 10, 10, .82);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+    }
+
+    #app-content {
+        overflow: visible;
+        background-color: transparent;
+    }
+
+    /* El fondo 3D acompaña todo el recorrido. */
+    #mobile-canvas {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    #app-content > * { position: relative; z-index: 1; }
+
+    .pzm-sec {
+        display: block;
+        width: 100%;
+        padding: 4.5rem 5%;
+        box-sizing: border-box;
+        scroll-margin-top: 4.5rem;
+    }
+
+    .pzm-hero {
+        min-height: calc(100vh - 60px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        padding-top: 2rem;
+    }
+
+    .pzm-hero .landing-bg { display: none; }
+
+    /* La cinta sustituye a la tira de logos del hero. */
+    .pzm-hero .clients-strip { display: none; }
+
+    .pzm-scroll-hint {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: .5rem;
+        margin-top: 2.5rem;
+        color: rgba(255, 255, 255, .38);
+        font-size: .62rem;
+        letter-spacing: .3em;
+        text-transform: uppercase;
+    }
+
+    .pzm-scroll-mouse {
+        width: 17px;
+        height: 28px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.5;
+    }
+
+    .pzm-scroll-mouse circle { fill: currentColor; stroke: none; }
+
+    /* --- Cinta de clientes --- */
+    .pzm-sec-cinta {
+        padding-left: 0;
+        padding-right: 0;
+        overflow: hidden;
+    }
+
+    .pzm-marquee {
+        display: flex;
+        width: max-content;
+        mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+        -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+    }
+
+    .pzm-mq-track {
+        display: flex;
+        align-items: center;
+        gap: 1.4rem;
+        padding-right: 1.4rem;
+        flex: 0 0 auto;
+    }
+
+    .pzm-mq-item {
+        font-size: 1.55rem;
+        font-weight: 800;
+        letter-spacing: -.03em;
+        white-space: nowrap;
+        color: rgba(255, 255, 255, .2);
+    }
+
+    .pzm-mq-sep { color: rgba(255, 255, 255, .12); font-size: .8rem; }
+
+    /* Las secciones movidas venían con cabecera y botón de "volver" de pantalla
+       completa; dentro del recorrido ya no tienen sentido. */
+    .pzm-sec .btn-volver { display: none; }
+    .pzm-sec .view-header { padding: 0 0 1.2rem; }
+    .pzm-sec .view-body { padding: 0; }
+
+    /* --- Sobre nosotros: tira deslizable con enganche --- */
+    .pzm-view-sobre .team-grid {
+        display: flex;
+        gap: 1rem;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: .8rem;
+        margin-left: -5%;
+        margin-right: -5%;
+        padding-left: 5%;
+        padding-right: 5%;
+        scrollbar-width: none;
+    }
+
+    .pzm-view-sobre .team-grid::-webkit-scrollbar { display: none; }
+
+    .pzm-view-sobre .team-member {
+        flex: 0 0 78%;
+        scroll-snap-align: center;
+        box-sizing: border-box;
+    }
+
+    /* Elementos que revela GSAP. Solo se ocultan si sabemos que vamos a poder
+       mostrarlos: nunca contenido inalcanzable. */
+    .pzm-anim .pzm-reveal { opacity: 0; will-change: transform, opacity; }
+
+    /* --- Vistas de detalle: siguen siendo pantalla completa --- */
+    #mobile-app .view {
+        position: fixed;
+        inset: 0;
+        z-index: 70;
+        overflow-y: auto;
+        background-color: #0a0a0a;
+        padding: 1rem 5% 3rem;
+    }
+
+    body.pzm-panel-abierto { overflow: hidden; }
+}
+
+@media (max-width: 1023px) and (prefers-reduced-motion: reduce) {
+    .pzm-marquee { mask-image: none; -webkit-mask-image: none; }
+    .pzm-scroll-hint { display: none; }
+}
+
+@media (max-width: 1023px) {
+    /* La marca ya viene blanca y sin fondo: nada de invert ni recuadro. */
+    .mobile-logo-icon {
+        height: 24px;
+        width: 24px;
+        filter: none;
+    }
+}

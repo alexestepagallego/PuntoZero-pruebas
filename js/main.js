@@ -85,11 +85,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* =========================================================================
-       INICIALIZACIÓN CONDICIONAL (Responsividad Extrema)
-       Aseguramos ahorro de recursos en móviles. El 3D no arrancará debajo de 1024px.
+       INICIALIZACIÓN CONDICIONAL
+       El 3D arranca en ambos, pero en móvil con una escena mucho más barata.
        ========================================================================= */
     if (window.innerWidth >= 1024) {
         initDesktop3DScene();
+    } else {
+        initMobile3DScene();
     }
 });
 
@@ -106,27 +108,47 @@ function Maps(targetId) {
 }
 
 // Escuchar los cambios en el hash
+/* La portada móvil dejó de ser una pantalla y pasó a ser un recorrido, igual
+   que en escritorio. Estos destinos ya no cambian de vista: bajan hasta su
+   sección. El resto (cartas, web, 3D, arch3D) siguen siendo pantalla completa.
+   Se conserva el enrutado por hash para que los enlaces sigan funcionando. */
+const PZM_SECCIONES = [
+    'view-landing',
+    'view-services-list',
+    'view-ejemplos',
+    'view-sobre',
+    'view-contacto-mobile'
+];
+
+function pzmCerrarVista() {
+    document.querySelectorAll('#mobile-app .view').forEach(v => v.classList.remove('active-view'));
+    document.body.classList.remove('pzm-panel-abierto');
+}
+
 function handleRouting() {
-    // Obtener el hash sin el '#' (si está vacío, por defecto es 'view-landing')
     const hash = window.location.hash.substring(1) || 'view-landing';
 
-    // Ocultar todas las vistas
-    document.querySelectorAll('.view').forEach(view => {
-        view.classList.remove('active-view');
-    });
+    if (PZM_SECCIONES.includes(hash)) {
+        pzmCerrarVista();
+        const destino = document.getElementById(hash);
+        if (!destino) return;
+        if (hash === 'view-landing') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            destino.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        return;
+    }
 
-    // Mostrar la vista objetivo
+    pzmCerrarVista();
     const targetView = document.getElementById(hash);
     if (targetView) {
         targetView.classList.add('active-view');
+        document.body.classList.add('pzm-panel-abierto');
+        targetView.scrollTop = 0;
     } else {
-        // Fallback de seguridad si el ID no existe
-        const homeView = document.getElementById('view-landing');
-        if (homeView) homeView.classList.add('active-view');
+        window.scrollTo(0, 0);
     }
-    
-    // Reset de scroll al inicio de la nueva sección
-    window.scrollTo(0, 0);
 }
 
 // Escuchar cuando el usuario pulsa botones (UI o Hardware)
@@ -341,10 +363,22 @@ function NavDesk(viewId) {
     }
 }
 
-function initDesktop3DScene() {
+function initDesktop3DScene(opciones) {
     if (typeof THREE === 'undefined') return;
 
-    const container = document.getElementById('canvas-container');
+    // Los valores por defecto son los del escritorio, tal cual estaban. El móvil
+    // llama a esta misma función pasando los suyos (ver initMobile3DScene).
+    const cfg = Object.assign({
+        contenedor: 'canvas-container',
+        escala: 8,
+        camaraZ: 12,
+        pixelRatioMax: Infinity,
+        inercia: true,
+        curveSegments: 26,
+        bevel: true
+    }, opciones || {});
+
+    const container = document.getElementById(cfg.contenedor);
     if (!container) return;
 
     // 1. ESCENA Y CAMARA
@@ -352,11 +386,11 @@ function initDesktop3DScene() {
 
     // El aspect ratio coincide directamente con las dimensiones del contenedor right
     const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-    camera.position.z = 12;
+    camera.position.z = cfg.camaraZ;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, cfg.pixelRatioMax));
     container.appendChild(renderer.domElement);
 
     // 2. GEOMETRÍA DEL LOGO
@@ -377,14 +411,17 @@ function initDesktop3DScene() {
             metalness: 0.55,
             roughness: 0.42
         });
-        logoModel = window.pzCrearLogo3D(THREE, material);
+        logoModel = window.pzCrearLogo3D(THREE, material, {
+            curveSegments: cfg.curveSegments,
+            bevel: cfg.bevel
+        });
 
         // A z=12 con fov 45 se ven unas 9,9 unidades de alto: 8 deja el logo
         // grande de fondo pero entero en pantalla, sin comerse el texto.
         const box = new THREE.Box3().setFromObject(logoModel);
         const size = box.getSize(new THREE.Vector3());
         const maxDim = Math.max(size.x, size.y, size.z);
-        logoModel.scale.setScalar(8 / maxDim);
+        logoModel.scale.setScalar(cfg.escala / maxDim);
 
         scene.add(logoModel);
     }
@@ -418,11 +455,13 @@ function initDesktop3DScene() {
     let windowHalfX = window.innerWidth / 2;
     let windowHalfY = window.innerHeight / 2;
 
-    document.addEventListener('mousemove', (event) => {
-        // Obtenemos coordenadas para inercia (-1 a 1)
-        mouseX = (event.clientX - windowHalfX) / windowHalfX;
-        mouseY = (event.clientY - windowHalfY) / windowHalfY;
-    });
+    if (cfg.inercia) {
+        document.addEventListener('mousemove', (event) => {
+            // Obtenemos coordenadas para inercia (-1 a 1)
+            mouseX = (event.clientX - windowHalfX) / windowHalfX;
+            mouseY = (event.clientY - windowHalfY) / windowHalfY;
+        });
+    }
 
     // 5. RESPONSIVE RESIZE
     window.addEventListener('resize', () => {
@@ -439,6 +478,9 @@ function initDesktop3DScene() {
     // 6. LOOP ANIMACIÓN
     function animate() {
         requestAnimationFrame(animate);
+        // En un móvil esto va a batería: si la pestaña no está a la vista, no
+        // hay nada que pintar.
+        if (document.hidden) return;
 
         // Limitamos rotación inercial al 15 grados (~0.26 radianes)
         const rotLimit = 0.26;
@@ -454,7 +496,7 @@ function initDesktop3DScene() {
             // exactamente como antes.
             const avance = window.pzAvanceScroll || 0;
             logoModel.rotation.z += avance * 0.012;
-            camera.position.z = 12 + avance * 5;
+            camera.position.z = cfg.camaraZ + avance * 5;
 
             // Lerp Ultra Inercial (giro pesado y colosal)
             logoModel.rotation.y += (targetX + avance * 2.4 - logoModel.rotation.y) * 0.02;
@@ -469,6 +511,23 @@ function initDesktop3DScene() {
 
     // Iniciar
     animate();
+}
+
+/**
+ * Misma escena en móvil, más barata: menos segmentos de curva, sin bisel,
+ * pixelRatio limitado a 2 y sin inercia de ratón (no hay ratón). La cámara se
+ * aleja porque en vertical cabe menos de ancho.
+ */
+function initMobile3DScene() {
+    initDesktop3DScene({
+        contenedor: 'mobile-canvas',
+        escala: 6.5,
+        camaraZ: 15,
+        pixelRatioMax: 2,
+        inercia: false,
+        curveSegments: 12,
+        bevel: false
+    });
 }
 
 /* =========================================================================

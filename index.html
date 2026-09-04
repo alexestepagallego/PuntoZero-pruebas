@@ -199,8 +199,7 @@
     <main id="mobile-app">
         <header class="mobile-header">
             <div style="display: flex; align-items: center; gap: 10px;">
-                <img src="logo_PuntoZero.jpg" alt="Icono" class="mobile-logo-icon"
-                    style="height:21px; width:auto; filter: invert(1);">
+                <img src="marca.svg" alt="" class="mobile-logo-icon" width="24" height="24">
                 <h1 class="mobile-logo">PuntoZero</h1>
             </div>
             <button class="mobile-menu-btn" onclick="document.getElementById('mobile-menu').classList.toggle('is-open')">
@@ -216,9 +215,19 @@
             </nav>
         </header>
 
+        <!-- Fondo 3D del móvil. Mismo logo generado por código que en escritorio,
+             pero con menos segmentos y sin bisel: en un teléfono se nota. -->
+        <div id="mobile-canvas" aria-hidden="true"></div>
+
         <div id="app-content">
             <!-- Vista Landing Nueva -->
-            <section id="view-landing" class="view active-view" style="height: 100%; position: relative; padding: 0 5%;">
+            <!-- ===== PORTADA MÓVIL CON SCROLL =====
+                 Antes era una app de pantallas: #view-landing medía height:100% y
+                 no había nada que deslizar. Ahora es un recorrido vertical con las
+                 mismas secciones que la versión de escritorio. Las vistas de detalle
+                 (cartas, web, 3D, arch3D) siguen siendo pantallas completas y las
+                 sigue resolviendo handleRouting por hash. -->
+            <section id="view-landing" class="pzm-sec pzm-hero">
                 <div class="landing-bg"></div>
                 <div class="landing-content" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; width: 100%;">
                     <h2 class="landing-headline">Tu negocio necesita algo.<br><span class="landing-grad">Lo construimos.</span></h2>
@@ -243,13 +252,44 @@
                     </div>
                 </div>
 
-                <div class="landing-footer-brand">
-                    <p>Diseñado en Córdoba. Desplegado a nivel global.</p>
+                <div class="pzm-scroll-hint" aria-hidden="true">
+                    <span>Desliza</span>
+                    <svg viewBox="0 0 24 40" class="pzm-scroll-mouse"><rect x="1" y="1" width="22" height="38" rx="11"/><circle cx="12" cy="11" r="2.5"/></svg>
                 </div>
             </section>
-
-            <!-- Vista de Servicios -->
-            <section id="view-services-list" class="view">
+            <section class="pzm-sec pzm-sec-cinta">
+                <div class="pzm-marquee" aria-label="Clientes de PuntoZero">
+                    <div class="pzm-mq-track">
+                        <span class="pzm-mq-item">Bar Glade</span>
+                        <span class="pzm-mq-sep" aria-hidden="true">✦</span>
+                        <span class="pzm-mq-item">Dynamic Health</span>
+                        <span class="pzm-mq-sep" aria-hidden="true">✦</span>
+                        <span class="pzm-mq-item">Café Bar Victoria</span>
+                        <span class="pzm-mq-sep" aria-hidden="true">✦</span>
+                        <span class="pzm-mq-item">Bocatería Sur</span>
+                        <span class="pzm-mq-sep" aria-hidden="true">✦</span>
+                        <span class="pzm-mq-item">Pizza José Villegas</span>
+                        <span class="pzm-mq-sep" aria-hidden="true">✦</span>
+                        <span class="pzm-mq-item">La Juana</span>
+                        <span class="pzm-mq-sep" aria-hidden="true">✦</span>
+                    </div>
+                    <div class="pzm-mq-track" aria-hidden="true">
+                        <span class="pzm-mq-item">Bar Glade</span>
+                        <span class="pzm-mq-sep" aria-hidden="true">✦</span>
+                        <span class="pzm-mq-item">Dynamic Health</span>
+                        <span class="pzm-mq-sep" aria-hidden="true">✦</span>
+                        <span class="pzm-mq-item">Café Bar Victoria</span>
+                        <span class="pzm-mq-sep" aria-hidden="true">✦</span>
+                        <span class="pzm-mq-item">Bocatería Sur</span>
+                        <span class="pzm-mq-sep" aria-hidden="true">✦</span>
+                        <span class="pzm-mq-item">Pizza José Villegas</span>
+                        <span class="pzm-mq-sep" aria-hidden="true">✦</span>
+                        <span class="pzm-mq-item">La Juana</span>
+                        <span class="pzm-mq-sep" aria-hidden="true">✦</span>
+                    </div>
+                </div>
+            </section>
+            <section id="view-services-list" class="pzm-sec pzm-view-services-list">
                 <div class="hero-intro">
                     <h2>Tu problema.<br>Nuestra ingeniería.</h2>
                     <p>No encajamos tu negocio en una plantilla. Entendemos lo que necesitas y lo construimos desde cero — rápido, limpio y sin sobreingeñería.</p>
@@ -299,241 +339,7 @@
                     </button>
                 </div>
             </section>
-
-            <!-- Vistas Internas -->
-            <section id="view-cartas" class="view">
-                <div class="view-header">
-                    <button onclick="window.history.back()" class="btn-volver">← Volver</button>
-                    <h2>Cartas Web Hostelería</h2>
-                </div>
-                <div class="view-body">
-                    <p>Implementamos cartas digitales con un diseño UX similar a una App nativa. Carga Zero-Latency
-                        mediante escaneo QR y gestión integral de productos.</p>
-                    <div class="example-links">
-                        <a href="https://bar-glade.netlify.app/" target="_blank" class="example-btn btn-glade">Ver
-                            Ejemplo: Bar Glade (Coctelería)</a>
-                        <a href="http://cartacafebarvictoria.es/" target="_blank" class="example-btn btn-victoria">Ver
-                            Ejemplo: Café Bar Victoria (Tradicional)</a>
-                        <a href="https://cartabocateriasur2.es/" target="_blank" class="example-btn btn-bocateria">Ver
-                            Ejemplo: Bocatería Sur</a>
-                    </div>
-
-                    <h3 class="pricing-section-title">Planes de Ingeniería Gastronómica</h3>
-                    <div class="pricing-container">
-                        <article class="pricing-card">
-                            <h4>Despliegue Estático</h4>
-                            <p class="pricing-price">Consultar</p>
-                            <ul class="pricing-features">
-                                <li>Alojamiento en dominio propio</li>
-                                <li>Tu mandas las fotografias</li>
-                                <li>Código QR Físico Básico</li>
-                            </ul>
-                            <button class="btn-contratar" onclick="enviarWhatsApp(this)"
-                                data-plan="Plan Básico - Cartas Digitales">Solicitar Presupuesto</button>
-                        </article>
-
-                        <article class="pricing-card advanced">
-                            <span class="badge">Más Popular</span>
-                            <h4>Gestión Dinámica</h4>
-                            <p class="pricing-price">Consultar</p>
-                            <ul class="pricing-features">
-                                <li>Todo lo del plan Básico</li>
-                                <li>Gestión semanal de la carta</li>
-                                <li>Soporte técnico prioritario</li>
-                            </ul>
-                            <button class="btn-contratar" onclick="enviarWhatsApp(this)"
-                                data-plan="Plan Avanzado - Cartas Digitales">Solicitar Presupuesto</button>
-                        </article>
-
-                        <article class="pricing-card">
-                            <h4>Ecosistema Total</h4>
-                            <p class="pricing-price">Consultar</p>
-                            <ul class="pricing-features">
-                                <li>Integración Multidioma</li>
-                                <li>Tomamos las fotgrafías</li>
-                                <li>Placas QR en impresión 3D premium</li>
-                            </ul>
-                            <button class="btn-contratar" onclick="enviarWhatsApp(this)"
-                                data-plan="Ecosistema Total - Cartas Digitales">Solicitar Presupuesto</button>
-                        </article>
-                    </div>
-                </div>
-            </section>
-
-            <section id="view-web" class="view">
-                <div class="view-header">
-                    <button onclick="window.history.back()" class="btn-volver">← Volver</button>
-                    <h2>Arquitectura Digital</h2>
-                </div>
-                <div class="view-body">
-                    <p>En PuntoZero abordamos el <strong>Desarrollo Full-Stack</strong> creando arquitecturas digitales
-                        robustas y escalables. Aplicamos metodologías ágiles e Ingeniería de Software avanzada para
-                        desarrollar plataformas a medida, sistemas e-commerce de alto rendimiento y ecosistemas
-                        digitales orientados a maximizar los resultados de tu negocio.</p>
-                    <div class="example-links">
-                        <a href="https://dynamichealth.es/" target="_blank" class="example-btn btn-dh">Ver
-                            Ejemplo: Dynamic Health</a>
-                    </div>
-
-                    <h3 class="pricing-section-title">Planes de Arquitectura Digital</h3>
-                    <div class="pricing-container">
-                        <article class="pricing-card">
-                            <h4>Escaparate Digital</h4>
-                            <p class="pricing-price">Consultar</p>
-                            <ul class="pricing-features">
-                                <li>Landing Page corporativa</li>
-                                <li>Optimización Zero-Latency</li>
-                                <li>Diseño Responsive Extremo</li>
-                            </ul>
-                            <button class="btn-contratar" onclick="enviarWhatsApp(this)"
-                                data-plan="Escaparate Digital - Arquitectura Digital">Solicitar Presupuesto</button>
-                        </article>
-
-                        <article class="pricing-card advanced">
-                            <span class="badge">E-commerce</span>
-                            <h4>Tienda Online</h4>
-                            <p class="pricing-price">Consultar</p>
-                            <ul class="pricing-features">
-                                <li>Todo lo anterior</li>
-                                <li>Embudos de pago optimizados</li>
-                                <li>Panel de gestión de stock</li>
-                            </ul>
-                            <button class="btn-contratar" onclick="enviarWhatsApp(this)"
-                                data-plan="Tienda Online - Arquitectura Digital">Solicitar Presupuesto</button>
-                        </article>
-
-                        <article class="pricing-card">
-                            <h4>Plataforma a Medida</h4>
-                            <p class="pricing-price">Consultar</p>
-                            <ul class="pricing-features">
-                                <li>Sistemas de reservas/gestión</li>
-                                <li>Integración de APIs complejas</li>
-                                <li>Renderizado 3D en tiempo real</li>
-                            </ul>
-                            <button class="btn-contratar" onclick="enviarWhatsApp(this)"
-                                data-plan="Plataforma a Medida - Arquitectura Digital">Solicitar Presupuesto</button>
-                        </article>
-                    </div>
-                </div>
-            </section>
-
-            <section id="view-3d" class="view">
-                <div class="view-header"
-                    style="position: absolute; top:0; left:0; right:0; z-index: 10; background: transparent; padding-top: 1rem;">
-                    <button onclick="window.history.back()" class="btn-volver"
-                        style="color: #ffffff; text-shadow: 0 1px 3px rgba(0,0,0,0.8); background: rgba(0,0,0,0.3); padding: 5px 12px; border-radius: 20px;">←
-                        Volver</button>
-                </div>
-
-                <div class="service-hero">
-                    <img src="baner_3D.webp" alt="Laboratorio Dual de Impresión 3D" class="service-hero-img">
-                    <div class="service-hero-content">
-                        <h2>Laboratorio Dual de Impresión 3D</h2>
-                    </div>
-                </div>
-
-                <div class="view-body" style="padding-top: 0.5rem;">
-                    <p>Contamos con un <strong>Laboratorio Dual de Impresión 3D</strong> que emplea tecnologías FDM y
-                        resina de alta resolución. Este laboratorio nos permite ofrecer servicios de ingeniería física,
-                        prototipado rápido para validación de piezas, modelado CAD de precisión e incluso creación de
-                        merchandising técnico exclusivo para empresas.</p>
-
-                    <div class="services-modal-container">
-                        <button class="service-modal-btn" data-service="llaveros">Merchandaising y llaveros
-                            personalizados</button>
-                        <button class="service-modal-btn" data-service="figuras">Figuras y Coleccionables</button>
-                        <button class="service-modal-btn" data-service="qrs">QRs de todo tipo</button>
-                        <button class="service-modal-btn" data-service="otro">Cualquier otro diseño</button>
-                    </div>
-
-                    <div class="pricing-explanation-block">
-                        <h3>PRESUPUESTO FLEXIBLE Y VARIABLE</h3>
-                        <p>El precio final de cada proyecto se calcula de forma personalizada basándose en factores
-                            técnicos clave, incluyendo el volumen de impresión, número de unidades, horas de máquina
-                            estimadas, y los colores y materiales seleccionados.</p>
-                        <button class="btn-contratar" onclick="enviarWhatsApp(this)"
-                            data-plan="Cotización Impresión 3D">Solicitar Presupuesto</button>
-                    </div>
-                </div>
-            </section>
-
-            <section id="view-arch3d" class="view">
-                <div class="view-header">
-                    <button onclick="window.history.back()" class="btn-volver">← Volver</button>
-                    <h2>Maquetar casas en 3d</h2>
-                </div>
-                <div class="view-body">
-                    <p>Ofrecemos un servicio especializado de <strong>Maquetación 3D de viviendas</strong>. Creamos
-                        visualizaciones arquitectónicas inmersivas y fotorrealistas que permiten explorar los espacios y
-                        distribuciones antes de su construcción o reforma.</p>
-                </div>
-            </section>
-
-            <section id="view-sobre" class="view">
-                <div class="view-header">
-                    <button onclick="window.history.back()" class="btn-volver">← Volver</button>
-                    <h2>Sobre Nosotros</h2>
-                </div>
-                <div class="view-body">
-                    <div class="team-photo-wrap">
-                        <img src="equipo.webp" alt="Equipo PuntoZero" class="team-photo"/>
-                    </div>
-                    <p style="margin-top: 1.5rem;">Somos un estudio de ingeniería de software fundado en Córdoba. Aplicamos el máximo rigor técnico para entregar soluciones digitales rápidas, seguras y sin complejidad innecesaria al cliente.</p>
-                    <div class="team-grid" style="margin-top: 1.5rem;">
-                        <div class="team-member">
-                            <h4>Dirección & Desarrollo</h4>
-                            <p>Especialista en arquitectura digital y desarrollo full-stack. Responsable de cada línea de código que sale del estudio.</p>
-                        </div>
-                        <div class="team-member">
-                            <h4>Diseño & Experiencia de Usuario</h4>
-                            <p>Convierte la complejidad técnica en interfaces elegantes e intuitivas. Garantiza que cada producto sea tan fácil de usar como potente.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="view-contacto-mobile" class="view">
-                <div class="view-header">
-                    <button onclick="window.history.back()" class="btn-volver">← Volver</button>
-                    <h2>Contáctanos</h2>
-                </div>
-                <div class="view-body">
-                    <div class="proceso-section">
-                        <p class="proceso-label">Cómo trabajamos</p>
-                        <div class="proceso-grid">
-                            <div class="proceso-step">
-                                <span class="paso-num">01</span>
-                                <div>
-                                    <h4>Cuéntanos tu idea</h4>
-                                    <p>Una llamada rápida para entender tu negocio, tus objetivos y el problema real a resolver.</p>
-                                </div>
-                            </div>
-                            <div class="proceso-step">
-                                <span class="paso-num">02</span>
-                                <div>
-                                    <h4>Demo en 48 horas</h4>
-                                    <p>Un prototipo funcional con tu marca y tus datos. Sin compromiso, sin adelantos.</p>
-                                </div>
-                            </div>
-                            <div class="proceso-step">
-                                <span class="paso-num">03</span>
-                                <div>
-                                    <h4>Desplegamos y escalamos</h4>
-                                    <p>Tu producto sale al mundo. Nos quedamos contigo para mejorarlo semana a semana.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <p style="margin-bottom: 2rem;">No dejes que la complejidad técnica te detenga. Cuéntame tu idea y busquemos juntos el PuntoZero de tu proyecto. Anímate a escribirme.</p>
-                    <div style="display: flex; flex-direction: column; gap: 1rem;">
-                        <button class="btn-contratar" style="background-color: #25D366; color: #fff; border: none; font-weight: 800;" onclick="enviarWhatsApp(this)" data-plan="Contacto General desde Móvil">Abrir Canal Directo (WhatsApp)</button>
-                        <a href="https://www.instagram.com/puntozero_sl" target="_blank" class="btn-contratar" style="background-color: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.3); text-decoration: none; padding: 1rem; display: block;">Sigue el Laboratorio (@puntozero_sl)</a>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Vista Ejemplos de Negocios -->
-            <section id="view-ejemplos" class="view">
+            <section id="view-ejemplos" class="pzm-sec pzm-view-ejemplos">
                 <div class="view-header">
                     <button onclick="window.history.back()" class="btn-volver">← Volver</button>
                     <h2>Ejemplos de Negocios</h2>
@@ -774,6 +580,242 @@
                     </div>
                 </div>
             </section>
+            <section id="view-sobre" class="pzm-sec pzm-view-sobre">
+                <div class="view-header">
+                    <button onclick="window.history.back()" class="btn-volver">← Volver</button>
+                    <h2>Sobre Nosotros</h2>
+                </div>
+                <div class="view-body">
+                    <div class="team-photo-wrap">
+                        <img src="equipo.webp" alt="Equipo PuntoZero" class="team-photo"/>
+                    </div>
+                    <p style="margin-top: 1.5rem;">Somos un estudio de ingeniería de software fundado en Córdoba. Aplicamos el máximo rigor técnico para entregar soluciones digitales rápidas, seguras y sin complejidad innecesaria al cliente.</p>
+                    <div class="team-grid" style="margin-top: 1.5rem;">
+                        <div class="team-member">
+                            <h4>Dirección & Desarrollo</h4>
+                            <p>Especialista en arquitectura digital y desarrollo full-stack. Responsable de cada línea de código que sale del estudio.</p>
+                        </div>
+                        <div class="team-member">
+                            <h4>Diseño & Experiencia de Usuario</h4>
+                            <p>Convierte la complejidad técnica en interfaces elegantes e intuitivas. Garantiza que cada producto sea tan fácil de usar como potente.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section id="view-contacto-mobile" class="pzm-sec pzm-view-contacto-mobile">
+                <div class="view-header">
+                    <button onclick="window.history.back()" class="btn-volver">← Volver</button>
+                    <h2>Contáctanos</h2>
+                </div>
+                <div class="view-body">
+                    <div class="proceso-section">
+                        <p class="proceso-label">Cómo trabajamos</p>
+                        <div class="proceso-grid">
+                            <div class="proceso-step">
+                                <span class="paso-num">01</span>
+                                <div>
+                                    <h4>Cuéntanos tu idea</h4>
+                                    <p>Una llamada rápida para entender tu negocio, tus objetivos y el problema real a resolver.</p>
+                                </div>
+                            </div>
+                            <div class="proceso-step">
+                                <span class="paso-num">02</span>
+                                <div>
+                                    <h4>Demo en 48 horas</h4>
+                                    <p>Un prototipo funcional con tu marca y tus datos. Sin compromiso, sin adelantos.</p>
+                                </div>
+                            </div>
+                            <div class="proceso-step">
+                                <span class="paso-num">03</span>
+                                <div>
+                                    <h4>Desplegamos y escalamos</h4>
+                                    <p>Tu producto sale al mundo. Nos quedamos contigo para mejorarlo semana a semana.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="margin-bottom: 2rem;">No dejes que la complejidad técnica te detenga. Cuéntame tu idea y busquemos juntos el PuntoZero de tu proyecto. Anímate a escribirme.</p>
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <button class="btn-contratar" style="background-color: #25D366; color: #fff; border: none; font-weight: 800;" onclick="enviarWhatsApp(this)" data-plan="Contacto General desde Móvil">Abrir Canal Directo (WhatsApp)</button>
+                        <a href="https://www.instagram.com/puntozero_sl" target="_blank" class="btn-contratar" style="background-color: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.3); text-decoration: none; padding: 1rem; display: block;">Sigue el Laboratorio (@puntozero_sl)</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Vista de Servicios -->
+
+            <!-- Vistas Internas -->
+            <section id="view-cartas" class="view">
+                <div class="view-header">
+                    <button onclick="window.history.back()" class="btn-volver">← Volver</button>
+                    <h2>Cartas Web Hostelería</h2>
+                </div>
+                <div class="view-body">
+                    <p>Implementamos cartas digitales con un diseño UX similar a una App nativa. Carga Zero-Latency
+                        mediante escaneo QR y gestión integral de productos.</p>
+                    <div class="example-links">
+                        <a href="https://bar-glade.netlify.app/" target="_blank" class="example-btn btn-glade">Ver
+                            Ejemplo: Bar Glade (Coctelería)</a>
+                        <a href="http://cartacafebarvictoria.es/" target="_blank" class="example-btn btn-victoria">Ver
+                            Ejemplo: Café Bar Victoria (Tradicional)</a>
+                        <a href="https://cartabocateriasur2.es/" target="_blank" class="example-btn btn-bocateria">Ver
+                            Ejemplo: Bocatería Sur</a>
+                    </div>
+
+                    <h3 class="pricing-section-title">Planes de Ingeniería Gastronómica</h3>
+                    <div class="pricing-container">
+                        <article class="pricing-card">
+                            <h4>Despliegue Estático</h4>
+                            <p class="pricing-price">Consultar</p>
+                            <ul class="pricing-features">
+                                <li>Alojamiento en dominio propio</li>
+                                <li>Tu mandas las fotografias</li>
+                                <li>Código QR Físico Básico</li>
+                            </ul>
+                            <button class="btn-contratar" onclick="enviarWhatsApp(this)"
+                                data-plan="Plan Básico - Cartas Digitales">Solicitar Presupuesto</button>
+                        </article>
+
+                        <article class="pricing-card advanced">
+                            <span class="badge">Más Popular</span>
+                            <h4>Gestión Dinámica</h4>
+                            <p class="pricing-price">Consultar</p>
+                            <ul class="pricing-features">
+                                <li>Todo lo del plan Básico</li>
+                                <li>Gestión semanal de la carta</li>
+                                <li>Soporte técnico prioritario</li>
+                            </ul>
+                            <button class="btn-contratar" onclick="enviarWhatsApp(this)"
+                                data-plan="Plan Avanzado - Cartas Digitales">Solicitar Presupuesto</button>
+                        </article>
+
+                        <article class="pricing-card">
+                            <h4>Ecosistema Total</h4>
+                            <p class="pricing-price">Consultar</p>
+                            <ul class="pricing-features">
+                                <li>Integración Multidioma</li>
+                                <li>Tomamos las fotgrafías</li>
+                                <li>Placas QR en impresión 3D premium</li>
+                            </ul>
+                            <button class="btn-contratar" onclick="enviarWhatsApp(this)"
+                                data-plan="Ecosistema Total - Cartas Digitales">Solicitar Presupuesto</button>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-web" class="view">
+                <div class="view-header">
+                    <button onclick="window.history.back()" class="btn-volver">← Volver</button>
+                    <h2>Arquitectura Digital</h2>
+                </div>
+                <div class="view-body">
+                    <p>En PuntoZero abordamos el <strong>Desarrollo Full-Stack</strong> creando arquitecturas digitales
+                        robustas y escalables. Aplicamos metodologías ágiles e Ingeniería de Software avanzada para
+                        desarrollar plataformas a medida, sistemas e-commerce de alto rendimiento y ecosistemas
+                        digitales orientados a maximizar los resultados de tu negocio.</p>
+                    <div class="example-links">
+                        <a href="https://dynamichealth.es/" target="_blank" class="example-btn btn-dh">Ver
+                            Ejemplo: Dynamic Health</a>
+                    </div>
+
+                    <h3 class="pricing-section-title">Planes de Arquitectura Digital</h3>
+                    <div class="pricing-container">
+                        <article class="pricing-card">
+                            <h4>Escaparate Digital</h4>
+                            <p class="pricing-price">Consultar</p>
+                            <ul class="pricing-features">
+                                <li>Landing Page corporativa</li>
+                                <li>Optimización Zero-Latency</li>
+                                <li>Diseño Responsive Extremo</li>
+                            </ul>
+                            <button class="btn-contratar" onclick="enviarWhatsApp(this)"
+                                data-plan="Escaparate Digital - Arquitectura Digital">Solicitar Presupuesto</button>
+                        </article>
+
+                        <article class="pricing-card advanced">
+                            <span class="badge">E-commerce</span>
+                            <h4>Tienda Online</h4>
+                            <p class="pricing-price">Consultar</p>
+                            <ul class="pricing-features">
+                                <li>Todo lo anterior</li>
+                                <li>Embudos de pago optimizados</li>
+                                <li>Panel de gestión de stock</li>
+                            </ul>
+                            <button class="btn-contratar" onclick="enviarWhatsApp(this)"
+                                data-plan="Tienda Online - Arquitectura Digital">Solicitar Presupuesto</button>
+                        </article>
+
+                        <article class="pricing-card">
+                            <h4>Plataforma a Medida</h4>
+                            <p class="pricing-price">Consultar</p>
+                            <ul class="pricing-features">
+                                <li>Sistemas de reservas/gestión</li>
+                                <li>Integración de APIs complejas</li>
+                                <li>Renderizado 3D en tiempo real</li>
+                            </ul>
+                            <button class="btn-contratar" onclick="enviarWhatsApp(this)"
+                                data-plan="Plataforma a Medida - Arquitectura Digital">Solicitar Presupuesto</button>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-3d" class="view">
+                <div class="view-header"
+                    style="position: absolute; top:0; left:0; right:0; z-index: 10; background: transparent; padding-top: 1rem;">
+                    <button onclick="window.history.back()" class="btn-volver"
+                        style="color: #ffffff; text-shadow: 0 1px 3px rgba(0,0,0,0.8); background: rgba(0,0,0,0.3); padding: 5px 12px; border-radius: 20px;">←
+                        Volver</button>
+                </div>
+
+                <div class="service-hero">
+                    <img src="baner_3D.webp" alt="Laboratorio Dual de Impresión 3D" class="service-hero-img">
+                    <div class="service-hero-content">
+                        <h2>Laboratorio Dual de Impresión 3D</h2>
+                    </div>
+                </div>
+
+                <div class="view-body" style="padding-top: 0.5rem;">
+                    <p>Contamos con un <strong>Laboratorio Dual de Impresión 3D</strong> que emplea tecnologías FDM y
+                        resina de alta resolución. Este laboratorio nos permite ofrecer servicios de ingeniería física,
+                        prototipado rápido para validación de piezas, modelado CAD de precisión e incluso creación de
+                        merchandising técnico exclusivo para empresas.</p>
+
+                    <div class="services-modal-container">
+                        <button class="service-modal-btn" data-service="llaveros">Merchandaising y llaveros
+                            personalizados</button>
+                        <button class="service-modal-btn" data-service="figuras">Figuras y Coleccionables</button>
+                        <button class="service-modal-btn" data-service="qrs">QRs de todo tipo</button>
+                        <button class="service-modal-btn" data-service="otro">Cualquier otro diseño</button>
+                    </div>
+
+                    <div class="pricing-explanation-block">
+                        <h3>PRESUPUESTO FLEXIBLE Y VARIABLE</h3>
+                        <p>El precio final de cada proyecto se calcula de forma personalizada basándose en factores
+                            técnicos clave, incluyendo el volumen de impresión, número de unidades, horas de máquina
+                            estimadas, y los colores y materiales seleccionados.</p>
+                        <button class="btn-contratar" onclick="enviarWhatsApp(this)"
+                            data-plan="Cotización Impresión 3D">Solicitar Presupuesto</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-arch3d" class="view">
+                <div class="view-header">
+                    <button onclick="window.history.back()" class="btn-volver">← Volver</button>
+                    <h2>Maquetar casas en 3d</h2>
+                </div>
+                <div class="view-body">
+                    <p>Ofrecemos un servicio especializado de <strong>Maquetación 3D de viviendas</strong>. Creamos
+                        visualizaciones arquitectónicas inmersivas y fotorrealistas que permiten explorar los espacios y
+                        distribuciones antes de su construcción o reforma.</p>
+                </div>
+            </section>
+
+
+
+            <!-- Vista Ejemplos de Negocios -->
         </div>
     </main>
 
@@ -1291,8 +1333,10 @@
     <!-- Script principal con la lógica condicional -->
     <script src="js/logo3d.js"></script>
     <script src="js/main.js"></script>
-    <!-- Animaciones de la portada con scroll (solo escritorio) -->
+    <!-- Animaciones de la portada con scroll. Cada uno se desactiva solo
+         fuera de su tamaño: home.js por encima de 1024px, movil.js por debajo. -->
     <script src="js/home.js"></script>
+    <script src="js/movil.js"></script>
 </body>
 
 </html>
