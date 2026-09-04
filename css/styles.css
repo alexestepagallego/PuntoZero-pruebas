@@ -2707,3 +2707,148 @@ button {
         filter: none;
     }
 }
+
+/* =========================================================================
+   LÍNEA TEMPORAL EN MÓVIL
+   -------------------------------------------------------------------------
+   Mismos hitos que en escritorio, pero se recorren con el dedo en vez de
+   anclando la sección. Se descarta el anclaje a propósito: con el dedo, que
+   un gesto vertical mueva el contenido en horizontal desorienta, y en iOS la
+   barra del navegador cambia de alto al desplazarse y da saltos en el pin.
+   Aquí manda el scroll nativo, con enganche por hito.
+   ========================================================================= */
+@media (max-width: 1023px) {
+
+    .pzm-tl[hidden] { display: none; }
+
+    .pzm-tl-pista {
+        margin: 0 0 1.2rem;
+        font-size: .68rem;
+        letter-spacing: .24em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, .34);
+    }
+
+    .pzm-tl-viewport {
+        position: relative;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        /* Se sale del padding de la sección para que la tira llegue al borde. */
+        margin: 0 -5%;
+        padding: 0 0 .5rem;
+    }
+
+    .pzm-tl-viewport::-webkit-scrollbar { display: none; }
+
+    .pzm-tl-rail {
+        position: absolute;
+        top: 14px;
+        left: 5%;
+        right: 5%;
+        height: 1px;
+        background: rgba(255, 255, 255, .12);
+    }
+
+    .pzm-tl-rail-lleno {
+        display: block;
+        height: 100%;
+        width: 0;
+        background: linear-gradient(90deg, rgba(255,255,255,.6), rgba(120,180,255,.9));
+        box-shadow: 0 0 10px rgba(120, 180, 255, .5);
+    }
+
+    .pzm-tl .pz-tl-track {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin: 0;
+        padding: 0 5%;
+        list-style: none;
+        width: max-content;
+    }
+
+    .pzm-tl .pz-tl-hito {
+        position: relative;
+        flex: 0 0 74vw;
+        max-width: 320px;
+        scroll-snap-align: center;
+        padding-top: 34px;
+    }
+
+    .pzm-tl .pz-tl-punto {
+        position: absolute;
+        top: 9px;
+        left: 0;
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: #0a0a0a;
+        border: 2px solid rgba(255, 255, 255, .5);
+        transition: background-color .3s ease, border-color .3s ease, box-shadow .3s ease;
+    }
+
+    .pzm-tl .pz-tl-hito.pz-tl-visto .pz-tl-punto {
+        background: #7ab4ff;
+        border-color: #7ab4ff;
+        box-shadow: 0 0 14px rgba(122, 180, 255, .7);
+    }
+
+    .pzm-tl .pz-tl-num {
+        position: absolute;
+        top: 0;
+        left: 22px;
+        font-size: 1.05rem;
+        font-weight: 800;
+        letter-spacing: -.02em;
+        color: rgba(255, 255, 255, .3);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .pzm-tl .pz-tl-foto {
+        margin: 0 0 1rem;
+        border-radius: 10px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, .04);
+        aspect-ratio: 4 / 3;
+    }
+
+    .pzm-tl .pz-tl-foto img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .pzm-tl .pz-tl-foto--vacia {
+        display: grid;
+        place-items: center;
+        border: 1px dashed rgba(255, 255, 255, .18);
+        background: rgba(255, 255, 255, .02);
+    }
+
+    .pzm-tl .pz-tl-foto--vacia span {
+        font-size: .6rem;
+        letter-spacing: .22em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, .3);
+    }
+
+    .pzm-tl .pz-tl-hito h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin: 0 0 .5rem;
+        color: #fff;
+    }
+
+    .pzm-tl .pz-tl-hito p {
+        font-size: .88rem;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, .6);
+        margin: 0;
+    }
+
+    .pzm-tl .pz-tl-hito p strong { color: rgba(255, 255, 255, .9); font-weight: 600; }
+}

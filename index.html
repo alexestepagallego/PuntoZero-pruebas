@@ -586,6 +586,19 @@
                     <h2>Sobre Nosotros</h2>
                 </div>
                 <div class="view-body">
+                    <!-- La línea temporal la clona js/movil.js desde la versión de
+                         escritorio, que está en el DOM aunque oculta. Así el contenido de
+                         los hitos vive en un único sitio del HTML: se edita allí y el móvil
+                         sigue el cambio solo. Si el clonado no ocurre (sin JS), se queda
+                         visible el bloque clásico y no se pierde nada. -->
+                    <div class="pzm-tl" hidden>
+                        <p class="pzm-tl-pista">Desliza para ver el recorrido →</p>
+                        <div class="pzm-tl-viewport">
+                            <div class="pzm-tl-rail" aria-hidden="true"><span class="pzm-tl-rail-lleno"></span></div>
+                        </div>
+                    </div>
+
+                    <div class="pzm-sobre-clasico">
                     <div class="team-photo-wrap">
                         <img src="equipo.webp" alt="Equipo PuntoZero" class="team-photo"/>
                     </div>
@@ -599,6 +612,7 @@
                             <h4>Diseño & Experiencia de Usuario</h4>
                             <p>Convierte la complejidad técnica en interfaces elegantes e intuitivas. Garantiza que cada producto sea tan fácil de usar como potente.</p>
                         </div>
+                    </div>
                     </div>
                 </div>
             </section>

@@ -29,8 +29,69 @@
     var $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
 
     var reducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reducido) return;
 
+    /* ---------------------------------------------------------------
+       Línea temporal: se clona la de escritorio
+
+       Los hitos viven en un solo sitio del HTML (#desk-view-sobre), aunque
+       ahí estén ocultos en móvil. Clonarlos evita mantener dos copias del
+       mismo contenido: se edita el de escritorio y el móvil sigue el cambio.
+
+       Se recorre con el dedo, no anclando la sección: en táctil, que un
+       gesto vertical mueva el contenido en horizontal desorienta. El raíl y
+       los puntos se alimentan del scrollLeft de la tira.
+
+       Va antes del corte por movimiento reducido a propósito: deslizar una
+       tira es scroll nativo, no una animación, y quien reduce movimiento no
+       tiene por qué quedarse sin el recorrido.
+       --------------------------------------------------------------- */
+    var tlCaja = $('.pzm-tl');
+    var tlOrigen = $('#desk-view-sobre .pz-tl-track');
+    var tlViewport = $('.pzm-tl-viewport');
+
+    if (tlCaja && tlOrigen && tlViewport) {
+        var clon = tlOrigen.cloneNode(true);
+        tlViewport.appendChild(clon);
+        tlCaja.hidden = false;
+
+        // Con la temporal en pantalla, el bloque clásico sobra.
+        var clasico = $('.pzm-sobre-clasico');
+        if (clasico) clasico.hidden = true;
+
+        var relleno = $('.pzm-tl-rail-lleno', tlCaja);
+        var hitos = $$('.pz-tl-hito', clon);
+
+        var pintar = function () {
+            var max = tlViewport.scrollWidth - tlViewport.clientWidth;
+            var avance = max > 0 ? tlViewport.scrollLeft / max : 1;
+            if (relleno) relleno.style.width = (avance * 100).toFixed(2) + '%';
+
+            // Un hito se marca cuando su centro ya ha entrado por la derecha.
+            var borde = tlViewport.getBoundingClientRect().right - 40;
+            hitos.forEach(function (h) {
+                var r = h.getBoundingClientRect();
+                if (r.left + r.width / 2 < borde) h.classList.add('pz-tl-visto');
+            });
+        };
+
+        tlViewport.addEventListener('scroll', pintar, { passive: true });
+        window.addEventListener('resize', pintar);
+        pintar();
+
+        // La tira entra al llegar la sección, como el resto.
+        if (!reducido) gsap.fromTo(hitos,
+            { opacity: 0, y: 22 },
+            {
+                opacity: 1,
+                y: 0,
+                duration: 0.55,
+                ease: 'power3.out',
+                stagger: 0.05,
+                scrollTrigger: { trigger: tlCaja, start: 'top 85%', once: true }
+            });
+    }
+
+    if (reducido) return;   // A partir de aquí, todo es movimiento.
     document.documentElement.classList.add('pzm-anim');
 
     /* ---------------------------------------------------------------
