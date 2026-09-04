@@ -1,4 +1,4 @@
+# Copia de pruebas de puntozerosl.es. No debe indexarse: la web buena
+# es https://puntozerosl.es/ y un duplicado indexado la perjudicaría.
 User-agent: *
-Allow: /
-
-Sitemap: https://puntozerosl.es/sitemap.xml
+Disallow: /

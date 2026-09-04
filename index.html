@@ -9,8 +9,9 @@
     <meta name="keywords"
         content="desarrollo web Córdoba, software a medida, diseño web hostelería, cartas digitales QR, programador Córdoba, impresión 3D Córdoba, agencia software España">
     <meta name="author" content="PuntoZero">
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="noindex, nofollow">
     <link rel="canonical" href="https://puntozerosl.es/">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <title>PuntoZero | Desarrollo Web y Software a Medida en Córdoba</title>
 
     <!-- Open Graph / Facebook / WhatsApp -->
@@ -56,9 +57,21 @@
     }
     </script>
 
-    <!-- Librería Three.js y GLTFLoader -->
+    <!-- Three.js. Ya no hace falta GLTFLoader: el logo se genera por código en
+         js/logo3d.js (el .GLB del repo era en realidad un 3MF y nunca cargó). -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+
+    <!-- GSAP + DrawSVG para la animación de carga. Todos los plugins de GSAP son
+         gratuitos desde que Webflow compró GreenSock: registro público, sin token. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/DrawSVGPlugin.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/Flip.min.js"></script>
+
+    <!-- Lenis para el scroll suave. Se elige frente a ScrollSmoother de GSAP
+         porque Lenis no transforma la página: los paneles de detalle y el canvas
+         3D usan position:fixed y un ancestro transformado los rompería. -->
+    <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.min.js"></script>
 
     <!-- Enlace a la hoja de estilos principal -->
     <link rel="stylesheet" href="css/styles.css">
@@ -67,9 +80,120 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Estilos de la animación de carga. En línea y no en css/styles.css por dos
+         razones: esa hoja la comparten /la-juana y /pizza-jose-villegas (y el
+         loader es solo de la portada), y en línea pinta en el primer frame,
+         sin parpadeo. -->
+    <style>
+        html.pz-cargando,
+        html.pz-cargando body { overflow: hidden; }
+
+        #pz-loader {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: grid;
+            place-items: center;
+            background: #0a0a0a;
+            will-change: transform;
+        }
+
+        #pz-loader .pz-stage {
+            position: relative;
+            display: grid;
+            place-items: center;
+            width: min(56vw, 40vh, 300px);
+            aspect-ratio: 1 / 1;
+        }
+
+        #pz-loader .pz-glow {
+            position: absolute;
+            inset: -35%;
+            border-radius: 50%;
+            opacity: 0;
+            pointer-events: none;
+            background: radial-gradient(circle,
+                rgba(255, 255, 255, .40) 0%,
+                rgba(255, 255, 255, .10) 38%,
+                transparent 68%);
+        }
+
+        #pz-logo {
+            position: relative;
+            width: 100%;
+            height: auto;
+            color: #fff;
+            overflow: visible;
+            /* Lo destapa GSAP al montar la línea de tiempo: así no se ve el
+               logo entero antes de empezar a dibujarse. */
+            visibility: hidden;
+        }
+
+        /* Con "reducir movimiento" el logo se ve quieto, sin dibujarse. */
+        .pz-quieto #pz-logo { visibility: visible; }
+
+        #pz-loader.pz-fuera { opacity: 0; transition: opacity .35s ease; }
+    </style>
 </head>
 
 <body>
+
+    <!-- Animación de carga: el logo se dibuja y la cortina sube. Solo en la
+         portada; las subpáginas no la llevan. -->
+    <div id="pz-loader" role="presentation">
+        <div class="pz-stage">
+            <div class="pz-glow"></div>
+            <svg id="pz-logo" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+              <defs>
+                <!-- En el logo original los huecos del donut de origen y del nodo
+                     central están calados también a través de la flecha. Sin esta
+                     máscara el trazo de la flecha los taparía. -->
+                <mask id="pz-huecos">
+                  <rect width="240" height="240" fill="#fff"/>
+                  <circle cx="62.15" cy="182.3" r="9.5" fill="#000"/>
+                  <circle cx="172.47" cy="63.67" r="7" fill="#000"/>
+                </mask>
+              </defs>
+              <g fill="none" stroke="currentColor" stroke-width="14.0">
+                <path class="pz-ring" d="M56.42 170.02A80.9 80.9 0 0 1 165.28 52.96"/>
+                <path class="pz-ring" d="M74.72 187.04A80.9 80.9 0 0 0 183.58 69.98"/>
+                <path class="pz-oval" d="M73.96 151.15A51.1 71.8 0 0 1 153.43 65.7"/>
+                <path class="pz-oval" d="M86.57 174.3A51.1 71.8 0 0 0 166.04 88.85"/>
+                <path class="pz-shaft" stroke-width="14.4" mask="url(#pz-huecos)" d="M62.15 182.3L190.17 44.63"/>
+                <circle class="pz-origin" cx="62.15" cy="182.3" r="14.75" stroke-width="10.5"/>
+                <circle class="pz-hub" cx="172.47" cy="63.67" r="10.5" stroke-width="7"/>
+                <circle class="pz-node" cx="120.0" cy="33.9" r="5.5" stroke-width="4.6"/>
+                <circle class="pz-node" cx="33.9" cy="120.0" r="5.5" stroke-width="4.6"/>
+                <circle class="pz-node" cx="206.1" cy="120.0" r="5.5" stroke-width="4.6"/>
+                <circle class="pz-node" cx="120.0" cy="206.1" r="5.5" stroke-width="4.6"/>
+                <circle class="pz-node" cx="68.9" cy="120.0" r="6.1" stroke-width="5.8"/>
+                <circle class="pz-node" cx="171.1" cy="120.0" r="6.1" stroke-width="5.8"/>
+              </g>
+              <polygon class="pz-head" fill="currentColor" points="208.7,24.71 203.36,56.88 176.99,32.37"/>
+            </svg>
+        </div>
+    </div>
+    <noscript>
+        <!-- Sin JavaScript nadie va a quitar la cortina: mejor no ponerla. -->
+        <style>#pz-loader { display: none; }</style>
+    </noscript>
+    <script>
+        (function () {
+            document.documentElement.classList.add('pz-cargando');
+            // Marca que hay JS: el CSS lo usa para ocultar cosas que solo el JS
+            // puede volver a mostrar (p. ej. las demos hasta que se busca).
+            document.documentElement.classList.add('pz-js');
+            // Red de seguridad por si js/loader.js no llega a cargar (404, red
+            // caída): sin esto la cortina taparía la web para siempre. El tope
+            // propio del loader es de 6 s, así que esto solo salta si no está.
+            window.setTimeout(function () {
+                var l = document.getElementById('pz-loader');
+                if (l && l.parentNode) l.parentNode.removeChild(l);
+                document.documentElement.classList.remove('pz-cargando');
+            }, 7000);
+        })();
+    </script>
+    <script src="js/loader.js"></script>
 
     <!-- VISTA MÓVIL (App Nativa) -->
     <main id="mobile-app">
@@ -418,6 +542,17 @@
                     <p style="margin-bottom:1.5rem;">Demos funcionales que hemos construido para distintos tipos de negocio. Cada una resuelve un problema real del sector.</p>
                     <div class="ej-buscador-wrap">
                         <input type="search" class="ej-search-input" placeholder="¿Cuál es tu negocio? Ej: peluquería, restaurante, gimnasio…" oninput="filtrarEjemplos(this)" autocomplete="off" aria-label="Buscar ejemplo por tipo de negocio">
+                        <!-- Estados del buscador. Las demos no se muestran hasta que
+                             se busca: eran 33 tarjetas ocupando media pantalla. -->
+                        <div class="ej-estado">
+                            <div class="ej-cargando" hidden aria-live="polite">
+                                <div class="ej-cargando-marca"></div>
+                                <p class="ej-cargando-txt">Buscando demos…</p>
+                            </div>
+                            <p class="ej-vacio">Dinos a qué te dedicas y te enseñamos la demo.
+                                <span>peluquería · taller · gimnasio · restaurante · clínica · floristería…</span>
+                            </p>
+                        </div>
                     <div class="ejemplos-grid-v2">
                         <a href="https://barberq.puntozerosl.es/" target="_blank" class="ej-card" data-kw="peluqueria peluquero corte de pelo afeitado salon de barberos barba hombre" style="--ej-color:#f59e0b">
                             <div class="ej-top"><span class="ej-emoji">✂️</span></div>
@@ -648,7 +783,7 @@
         <div id="canvas-container"></div>
 
         <header class="desk-nav">
-            <div class="desk-logo">PUNTOZERO</div>
+            <div class="desk-logo"><span id="pz-marca-slot" class="desk-logo-marca" aria-hidden="true"></span>PUNTOZERO</div>
             <nav class="desk-menu">
                 <a href="#" onclick="NavDesk('desk-home-view'); return false;">Inicio</a>
 
@@ -669,7 +804,12 @@
             </nav>
         </header>
 
-        <section id="desk-home-view" class="desk-view active-desk-view desk-hero">
+        <!-- ===== PORTADA CON SCROLL =====
+             El home dejó de ser un panel a pantalla completa y pasó a ser un
+             recorrido vertical. Las vistas de detalle (cartas, web, 3D, arch3D)
+             siguen siendo paneles superpuestos: NavDesk decide cuál toca. -->
+        <main id="desk-scroll">
+        <section id="desk-home-view" class="pz-sec pz-hero">
             <div class="hero-text-overlay">
                 <h1 class="desk-main-title">Tu negocio necesita algo.<br><span class="desk-grad">Lo construimos.</span></h1>
                 <p class="desk-main-subtitle">No trabajamos con catálogos fijos. Escuchamos tu problema y entregamos la solución exacta que necesitas — desde Córdoba para cualquier parte del mundo.</p>
@@ -683,9 +823,45 @@
                     </div>
                 </div>
             </div>
+            <div class="pz-scroll-hint" aria-hidden="true">
+                <span>Desliza</span>
+                <svg viewBox="0 0 24 40" class="pz-scroll-mouse"><rect x="1" y="1" width="22" height="38" rx="11"/><circle cx="12" cy="11" r="2.5"/></svg>
+            </div>
         </section>
-
-        <section id="desk-services-view" class="desk-view">
+        <section class="pz-sec pz-sec-cinta">
+            <p class="pz-sec-label">Confían en nosotros</p>
+            <div class="pz-marquee" aria-label="Clientes de PuntoZero">
+                <div class="pz-mq-track">
+                    <span class="pz-mq-item">Bar Glade</span>
+                    <span class="pz-mq-sep" aria-hidden="true">✦</span>
+                    <span class="pz-mq-item">Dynamic Health</span>
+                    <span class="pz-mq-sep" aria-hidden="true">✦</span>
+                    <span class="pz-mq-item">Café Bar Victoria</span>
+                    <span class="pz-mq-sep" aria-hidden="true">✦</span>
+                    <span class="pz-mq-item">Bocatería Sur</span>
+                    <span class="pz-mq-sep" aria-hidden="true">✦</span>
+                    <span class="pz-mq-item">Pizza José Villegas</span>
+                    <span class="pz-mq-sep" aria-hidden="true">✦</span>
+                    <span class="pz-mq-item">La Juana</span>
+                    <span class="pz-mq-sep" aria-hidden="true">✦</span>
+                </div>
+                <div class="pz-mq-track" aria-hidden="true">
+                    <span class="pz-mq-item">Bar Glade</span>
+                    <span class="pz-mq-sep" aria-hidden="true">✦</span>
+                    <span class="pz-mq-item">Dynamic Health</span>
+                    <span class="pz-mq-sep" aria-hidden="true">✦</span>
+                    <span class="pz-mq-item">Café Bar Victoria</span>
+                    <span class="pz-mq-sep" aria-hidden="true">✦</span>
+                    <span class="pz-mq-item">Bocatería Sur</span>
+                    <span class="pz-mq-sep" aria-hidden="true">✦</span>
+                    <span class="pz-mq-item">Pizza José Villegas</span>
+                    <span class="pz-mq-sep" aria-hidden="true">✦</span>
+                    <span class="pz-mq-item">La Juana</span>
+                    <span class="pz-mq-sep" aria-hidden="true">✦</span>
+                </div>
+            </div>
+        </section>
+        <section id="desk-services-view" class="pz-sec pz-sec-servicios">
             <div class="desk-services-container">
                 <button onclick="NavDesk('desk-home-view')" class="btn-volver-desk">← Volver al inicio</button>
 
@@ -727,9 +903,200 @@
                 </div>
             </div>
         </section>
+        <section id="desk-view-ejemplos" class="pz-sec pz-sec-ejemplos">
+            <div class="desk-detail-container">
+                <div class="view-header">
+                    <button onclick="NavDesk('desk-home-view')" class="btn-volver">← Volver al inicio</button>
+                    <h2>Ejemplos de Negocios</h2>
+                </div>
+                <div class="view-body">
+                    <p style="margin-bottom:1.5rem;">Demos funcionales para distintos tipos de negocio. Cada una resuelve un problema real del sector.</p>
+                    <div class="ej-buscador-wrap">
+                        <input type="search" class="ej-search-input" placeholder="¿Cuál es tu negocio? Ej: peluquería, restaurante, gimnasio…" oninput="filtrarEjemplos(this)" autocomplete="off" aria-label="Buscar ejemplo por tipo de negocio">
+                        <!-- Estados del buscador. Las demos no se muestran hasta que
+                             se busca: eran 33 tarjetas ocupando media pantalla. -->
+                        <div class="ej-estado">
+                            <div class="ej-cargando" hidden aria-live="polite">
+                                <div class="ej-cargando-marca"></div>
+                                <p class="ej-cargando-txt">Buscando demos…</p>
+                            </div>
+                            <p class="ej-vacio">Dinos a qué te dedicas y te enseñamos la demo.
+                                <span>peluquería · taller · gimnasio · restaurante · clínica · floristería…</span>
+                            </p>
+                        </div>
+                    <div class="ejemplos-grid-v2 ejemplos-grid-v2-desk">
+                        <a href="https://barberq.puntozerosl.es/" target="_blank" class="ej-card" data-kw="peluqueria peluquero corte de pelo afeitado salon de barberos barba hombre" style="--ej-color:#f59e0b"><div class="ej-top"><span class="ej-emoji">✂️</span></div><p class="ej-sector">Barbería</p><h4 class="ej-nombre">BarberQ</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://garagetrack.puntozerosl.es/" target="_blank" class="ej-card" data-kw="taller mecanico coches automoviles reparacion de coches vehiculos neumaticos revision" style="--ej-color:#3b82f6"><div class="ej-top"><span class="ej-emoji">🔧</span></div><p class="ej-sector">Taller mecánico</p><h4 class="ej-nombre">GarageTrack</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://dentaflow.puntozerosl.es/" target="_blank" class="ej-card" data-kw="dentista clinica dental odontologia dientes ortodoncia salud bucal" style="--ej-color:#06b6d4"><div class="ej-top"><span class="ej-emoji">🦷</span></div><p class="ej-sector">Clínica dental</p><h4 class="ej-nombre">DentaFlow</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://fitsched.puntozerosl.es/" target="_blank" class="ej-card" data-kw="gimnasio gym fitness entrenamiento personal deporte pesas clases" style="--ej-color:#a855f7"><div class="ej-top"><span class="ej-emoji">💪</span></div><p class="ej-sector">Gimnasio</p><h4 class="ej-nombre">FitSched</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://tableflow.puntozerosl.es/" target="_blank" class="ej-card" data-kw="restaurante bar cafeteria hosteleria reservas de mesas comida cocina" style="--ej-color:#f97316"><div class="ej-top"><span class="ej-emoji">🍽️</span></div><p class="ej-sector">Restaurante</p><h4 class="ej-nombre">TableFlow</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://propfinder.puntozerosl.es/" target="_blank" class="ej-card" data-kw="inmobiliaria pisos casas alquiler venta de viviendas propiedades agencia inmobiliaria" style="--ej-color:#10b981"><div class="ej-top"><span class="ej-emoji">🏠</span></div><p class="ej-sector">Inmobiliaria</p><h4 class="ej-nombre">PropFinder</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://vetflow.puntozerosl.es/" target="_blank" class="ej-card" data-kw="veterinaria veterinario mascotas animales perros gatos clinica veterinaria citas" style="--ej-color:#22c55e"><div class="ej-top"><span class="ej-emoji">🐾</span></div><p class="ej-sector">Veterinaria</p><h4 class="ej-nombre">VetFlow</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://glowbook.puntozerosl.es/" target="_blank" class="ej-card" data-kw="estetica spa salon de belleza manicura masajes unas tratamientos faciales" style="--ej-color:#f472b6"><div class="ej-top"><span class="ej-emoji">💅</span></div><p class="ej-sector">Estética & Spa</p><h4 class="ej-nombre">GlowBook</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://cleantrack.puntozerosl.es/" target="_blank" class="ej-card" data-kw="tintoreria lavanderia limpieza de ropa tintorerias planchado lavado en seco" style="--ej-color:#38bdf8"><div class="ej-top"><span class="ej-emoji">👔</span></div><p class="ej-sector">Tintorería</p><h4 class="ej-nombre">CleanTrack</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://fixnow.puntozerosl.es/" target="_blank" class="ej-card" data-kw="fontanero electricista cerrajero urgencias del hogar reparaciones mantenimiento averias" style="--ej-color:#ef4444"><div class="ej-top"><span class="ej-emoji">🚨</span></div><p class="ej-sector">Urgencias hogar</p><h4 class="ej-nombre">FixNow</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://techhub.puntozerosl.es/" target="_blank" class="ej-card" data-kw="informatica reparacion de moviles ordenadores tecnologia soporte tecnico electronica" style="--ej-color:#0ea5e9"><div class="ej-top"><span class="ej-emoji">💻</span></div><p class="ej-sector">Informática</p><h4 class="ej-nombre">TechHub</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://threadshop.puntozerosl.es/" target="_blank" class="ej-card" data-kw="tienda de ropa moda boutique accesorios complementos" style="--ej-color:#f43f5e"><div class="ej-top"><span class="ej-emoji">👗</span></div><p class="ej-sector">Moda & Accesorios</p><h4 class="ej-nombre">ThreadShop</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://paperco.puntozerosl.es/" target="_blank" class="ej-card" data-kw="papeleria libreria manualidades material escolar arte regalos" style="--ej-color:#f59e0b"><div class="ej-top"><span class="ej-emoji">📓</span></div><p class="ej-sector">Papelería & Arte</p><h4 class="ej-nombre">PaperCo</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://boxfit.puntozerosl.es/" target="_blank" class="ej-card" data-kw="boxeo crossfit entrenamiento funcional artes marciales gimnasio de boxeo" style="--ej-color:#dc2626"><div class="ej-top"><span class="ej-emoji">🥊</span></div><p class="ej-sector">Gimnasio funcional</p><h4 class="ej-nombre">BoxFit</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://folio.puntozerosl.es/" target="_blank" class="ej-card" data-kw="portfolio diseñador freelance fotografo artista creativo agencia creativa" style="--ej-color:#8b5cf6"><div class="ej-top"><span class="ej-emoji">🎨</span></div><p class="ej-sector">Portfolio digital</p><h4 class="ej-nombre">Folio</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://bloomq.puntozerosl.es/" target="_blank" class="ej-card" data-kw="floristeria flores ramos plantas regalos florales entrega de flores a domicilio" style="--ej-color:#ec4899"><div class="ej-top"><span class="ej-emoji">🌸</span></div><p class="ej-sector">Floristería</p><h4 class="ej-nombre">BloomQ</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://crusthub.puntozerosl.es/" target="_blank" class="ej-card" data-kw="panaderia pasteleria reposteria pan artesano tartas dulces bolleria masa madre" style="--ej-color:#d97706"><div class="ej-top"><span class="ej-emoji">🥐</span></div><p class="ej-sector">Panadería & Pastelería</p><h4 class="ej-nombre">CrustHub</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://drivesched.puntozerosl.es/" target="_blank" class="ej-card" data-kw="autoescuela carnet de conducir clases practicas examen de conducir teorico" style="--ej-color:#2563eb"><div class="ej-top"><span class="ej-emoji">🚗</span></div><p class="ej-sector">Autoescuela</p><h4 class="ej-nombre">DriveSched</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://zenflow.puntozerosl.es/" target="_blank" class="ej-card" data-kw="yoga pilates meditacion estudio de yoga bienestar relajacion clases" style="--ej-color:#84cc16"><div class="ej-top"><span class="ej-emoji">🧘</span></div><p class="ej-sector">Yoga & Pilates</p><h4 class="ej-nombre">ZenFlow</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://lenspoint.puntozerosl.es/" target="_blank" class="ej-card" data-kw="optica gafas lentillas graduacion revision visual monturas oculista" style="--ej-color:#06b6d4"><div class="ej-top"><span class="ej-emoji">👓</span></div><p class="ej-sector">Óptica</p><h4 class="ej-nombre">LensPoint</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://goldline.puntozerosl.es/" target="_blank" class="ej-card" data-kw="joyeria joyas anillos collares pulseras relojeria orfebreria oro" style="--ej-color:#eab308"><div class="ej-top"><span class="ej-emoji">💍</span></div><p class="ej-sector">Joyería</p><h4 class="ej-nombre">GoldLine</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://tripnest.puntozerosl.es/" target="_blank" class="ej-card" data-kw="agencia de viajes vacaciones escapadas turismo vuelos hoteles reservas" style="--ej-color:#0ea5e9"><div class="ej-top"><span class="ej-emoji">✈️</span></div><p class="ej-sector">Agencia de viajes</p><h4 class="ej-nombre">TripNest</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://gelatohub.puntozerosl.es/" target="_blank" class="ej-card" data-kw="heladeria helados gelato postres heladeria artesanal sorbetes" style="--ej-color:#f472b6"><div class="ej-top"><span class="ej-emoji">🍦</span></div><p class="ej-sector">Heladería artesanal</p><h4 class="ej-nombre">GelatoHub</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://inkroom.puntozerosl.es/" target="_blank" class="ej-card" data-kw="tatuajes estudio de tatuajes tinta piercing tatuador disenos" style="--ej-color:#ef4444"><div class="ej-top"><span class="ej-emoji">🖋️</span></div><p class="ej-sector">Estudio de tatuajes</p><h4 class="ej-nombre">InkRoom</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://physiocore.puntozerosl.es/" target="_blank" class="ej-card" data-kw="fisioterapia rehabilitacion lesiones recuperacion fisio masajes terapeuticos" style="--ej-color:#14b8a6"><div class="ej-top"><span class="ej-emoji">🩺</span></div><p class="ej-sector">Fisioterapia</p><h4 class="ej-nombre">PhysioCore</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://hophouse.puntozerosl.es/" target="_blank" class="ej-card" data-kw="cerveceria microcerveceria artesanal cerveza craft beer barril pub bar de cervezas" style="--ej-color:#f59e0b"><div class="ej-top"><span class="ej-emoji">🍺</span></div><p class="ej-sector">Microcervecería</p><h4 class="ej-nombre">HopHouse</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://fernly.puntozerosl.es/" target="_blank" class="ej-card" data-kw="vivero plantas de interior jardineria floristeria macetas decoracion verde" style="--ej-color:#3f6b4f"><div class="ej-top"><span class="ej-emoji">🌿</span></div><p class="ej-sector">Vivero urbano</p><h4 class="ej-nombre">Fernly</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://roastnote.puntozerosl.es/" target="_blank" class="ej-card" data-kw="cafeteria tostadero de cafe cafe de especialidad torrefaccion grano cafe artesanal" style="--ej-color:#9a3412"><div class="ej-top"><span class="ej-emoji">☕</span></div><p class="ej-sector">Tostadero de café</p><h4 class="ej-nombre">RoastNote</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://waypoint.puntozerosl.es/" target="_blank" class="ej-card" data-kw="gasolinera estacion de servicio combustible carburante area de servicio repostaje gasoleo" style="--ej-color:#f5a623"><div class="ej-top"><span class="ej-emoji">⛽</span></div><p class="ej-sector">Área de servicio</p><h4 class="ej-nombre">WayPoint</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://domio.puntozerosl.es/" target="_blank" class="ej-card" data-kw="electrodomesticos tienda de electrodomesticos lavadoras frigorificos television climatizacion hogar" style="--ej-color:#0e7490"><div class="ej-top"><span class="ej-emoji">🔌</span></div><p class="ej-sector">Electrodomésticos</p><h4 class="ej-nombre">Domio</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://solhaven.puntozerosl.es/" target="_blank" class="ej-card" data-kw="hotel hotel boutique alojamiento turismo rural escapadas habitaciones reservas hospedaje" style="--ej-color:#c9914c"><div class="ej-top"><span class="ej-emoji">🏨</span></div><p class="ej-sector">Hotel boutique</p><h4 class="ej-nombre">Solhaven</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://farmaciavelilla.puntozerosl.es/" target="_blank" class="ej-card" data-kw="farmacia botica medicamentos parafarmacia farmacia de guardia salud recetas vacunacion" style="--ej-color:#1f9d6f"><div class="ej-top"><span class="ej-emoji">💊</span></div><p class="ej-sector">Farmacia</p><h4 class="ej-nombre">Farmacia Velilla</h4><span class="ej-btn">Ver demo</span></a>
+                        <a href="https://funerariaalba.puntozerosl.es/" target="_blank" class="ej-card" data-kw="funeraria tanatorio servicios funerarios velatorio ceremonias acompañamiento" style="--ej-color:#7c8b76"><div class="ej-top"><span class="ej-emoji">🕊️</span></div><p class="ej-sector">Funeraria</p><h4 class="ej-nombre">Funeraria Alba</h4><span class="ej-btn">Ver demo</span></a>
+                    </div>
+                        <p class="ej-no-results" hidden>No tenemos todavía una demo para ese tipo de negocio, pero podemos crear una a tu medida. <a href="#" onclick="NavDesk('desk-view-contacto'); return false;">Hablemos →</a></p>
+                    </div>
+                    <div style="margin-top:2rem;">
+                        <button onclick="NavDesk('desk-view-contacto')" class="btn-cta-full" style="max-width:360px;">
+                            ¿Quieres algo así para tu negocio? →
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- ===== SOBRE NOSOTROS: LÍNEA TEMPORAL HORIZONTAL =====
+             Se recorre de lado mientras la sección queda anclada en pantalla.
+
+             PARA AÑADIR O CAMBIAR HITOS: cada <li class="pz-tl-hito"> es uno.
+             Duplica el bloque y listo, no hay que tocar el JS ni el CSS; el
+             recorrido se recalcula solo a partir del ancho.
+
+             PARA PONER UNA FOTO donde ahora pone "Foto pendiente", sustituye
+             el <figure class="pz-tl-foto pz-tl-foto--vacia"> entero por:
+                 <figure class="pz-tl-foto">
+                     <img src="mi-foto.webp" alt="Descripción" loading="lazy" decoding="async"/>
+                 </figure>
+
+             LOS NÚMEROS (01, 02...) pueden cambiarse por años reales sin tocar
+             nada más: el estilo es el mismo. Se dejan numerados porque no me
+             consta la cronología real del estudio. -->
+        <section id="desk-view-sobre" class="pz-sec pz-sec-sobre">
+            <div class="pz-tl-cabecera">
+                <h2>Sobre Nosotros</h2>
+                <p class="pz-tl-intro">El recorrido del estudio, de la primera carta digital al laboratorio 3D.</p>
+            </div>
+
+            <div class="pz-tl-viewport">
+                <div class="pz-tl-rail" aria-hidden="true"><span class="pz-tl-rail-lleno"></span></div>
+                <ol class="pz-tl-track">
+                    <li class="pz-tl-hito">
+                        <span class="pz-tl-punto" aria-hidden="true"></span>
+                        <span class="pz-tl-num">01</span>
+                        <figure class="pz-tl-foto">
+                            <img src="equipo.webp" alt="Equipo de PuntoZero" loading="lazy" decoding="async"/>
+                        </figure>
+                        <h3>El estudio</h3>
+                        <p>Un estudio de ingeniería de software fundado en Córdoba con vocación global. Aplicamos el máximo rigor técnico para entregar soluciones rápidas, seguras y sin complejidad innecesaria.</p>
+                    </li>
+                    <li class="pz-tl-hito">
+                        <span class="pz-tl-punto" aria-hidden="true"></span>
+                        <span class="pz-tl-num">02</span>
+                        <figure class="pz-tl-foto pz-tl-foto--vacia">
+                            <span>Foto pendiente</span>
+                        </figure>
+                        <h3>La hostelería primero</h3>
+                        <p>Las cartas digitales fueron el principio: menús QR con carga instantánea para Bar Glade, Café Bar Victoria, Bocatería Sur y Pizza José Villegas.</p>
+                    </li>
+                    <li class="pz-tl-hito">
+                        <span class="pz-tl-punto" aria-hidden="true"></span>
+                        <span class="pz-tl-num">03</span>
+                        <figure class="pz-tl-foto pz-tl-foto--vacia">
+                            <span>Foto pendiente</span>
+                        </figure>
+                        <h3>Más allá de la carta</h3>
+                        <p>El mismo enfoque aplicado a otros sectores: Dynamic Health y La Juana. Cada negocio tiene un problema distinto y ninguno cabe en una plantilla.</p>
+                    </li>
+                    <li class="pz-tl-hito">
+                        <span class="pz-tl-punto" aria-hidden="true"></span>
+                        <span class="pz-tl-num">04</span>
+                        <figure class="pz-tl-foto">
+                            <img src="llaveros_3d.webp" alt="Llaveros impresos en 3D" loading="lazy" decoding="async"/>
+                        </figure>
+                        <h3>El laboratorio 3D</h3>
+                        <p>Impresión FDM y resina. Merchandising técnico, llaveros y piezas a medida para empresas que quieren algo que se pueda tocar.</p>
+                    </li>
+                    <li class="pz-tl-hito">
+                        <span class="pz-tl-punto" aria-hidden="true"></span>
+                        <span class="pz-tl-num">05</span>
+                        <figure class="pz-tl-foto">
+                            <img src="ejemplo_qr_3d.webp" alt="Código QR extruido en 3D" loading="lazy" decoding="async"/>
+                        </figure>
+                        <h3>Piezas que funcionan</h3>
+                        <p>Códigos QR extruidos, prototipado y modelado CAD de precisión. Objetos con una función, no adornos.</p>
+                    </li>
+                    <li class="pz-tl-hito">
+                        <span class="pz-tl-punto" aria-hidden="true"></span>
+                        <span class="pz-tl-num">06</span>
+                        <figure class="pz-tl-foto pz-tl-foto--vacia">
+                            <span>Foto pendiente</span>
+                        </figure>
+                        <h3>El equipo</h3>
+                        <p><strong>Dirección &amp; Desarrollo</strong> — arquitectura digital y full-stack, responsable de cada línea de código.<br><br><strong>Diseño &amp; Experiencia de Usuario</strong> — convierte la complejidad técnica en interfaces elegantes e intuitivas.</p>
+                    </li>
+                </ol>
+            </div>
+        </section>
+        <section id="desk-view-contacto" class="pz-sec pz-sec-contacto">
+            <div class="desk-contacto-container">
+                <button onclick="NavDesk('desk-home-view')" class="btn-volver-contacto">← Volver al inicio</button>
+                <div class="proceso-section proceso-section-desk">
+                    <p class="proceso-label">Cómo trabajamos</p>
+                    <div class="proceso-grid proceso-grid-desk">
+                        <div class="proceso-step proceso-step-desk">
+                            <span class="paso-num">01</span>
+                            <div>
+                                <h4>Cuéntanos tu idea</h4>
+                                <p>Una llamada rápida para entender tu negocio, tus objetivos y el problema real a resolver.</p>
+                            </div>
+                        </div>
+                        <div class="proceso-step proceso-step-desk">
+                            <span class="paso-num">02</span>
+                            <div>
+                                <h4>Demo en 48 horas</h4>
+                                <p>Un prototipo funcional con tu marca y tus datos. Sin compromiso, sin adelantos.</p>
+                            </div>
+                        </div>
+                        <div class="proceso-step proceso-step-desk">
+                            <span class="paso-num">03</span>
+                            <div>
+                                <h4>Desplegamos y escalamos</h4>
+                                <p>Tu producto sale al mundo. Nos quedamos contigo para mejorarlo semana a semana.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="contacto-grid-50">
+                    <div class="contacto-left">
+                        <h2>El primer paso hacia la Ingeniería de Alto Rendimiento empieza con una conversación.</h2>
+                        <p>No dejes que la complejidad técnica te detenga. Cuéntame tu idea y busquemos juntos el PuntoZero de tu proyecto. Anímate a escribirme.</p>
+                    </div>
+                    <div class="contacto-right">
+                        <button class="btn-contacto-desk btn-wa-desk" onclick="enviarWhatsApp(this)" data-plan="Contacto General desde Web">Abrir Canal Directo (WhatsApp)</button>
+                        <a href="https://www.instagram.com/puntozero_sl" target="_blank" class="btn-contacto-desk btn-ig-desk">Sigue el Laboratorio (@puntozero_sl)</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        </main>
+
 
         <!-- Nuevas vistas de detalle de escritorio -->
-        <section id="desk-view-cartas" class="desk-view">
+        <section id="desk-view-cartas" class="desk-view" data-lenis-prevent>
             <div class="desk-detail-container">
                 <div class="view-header">
                     <button onclick="NavDesk('desk-home-view')" class="btn-volver">← Volver al inicio</button>
@@ -790,7 +1157,7 @@
             </div>
         </section>
 
-        <section id="desk-view-web" class="desk-view">
+        <section id="desk-view-web" class="desk-view" data-lenis-prevent>
             <div class="desk-detail-container">
                 <div class="view-header">
                     <button onclick="NavDesk('desk-home-view')" class="btn-volver">← Volver al inicio</button>
@@ -849,7 +1216,7 @@
             </div>
         </section>
 
-        <section id="desk-view-3d" class="desk-view">
+        <section id="desk-view-3d" class="desk-view" data-lenis-prevent>
             <div class="desk-detail-container">
                 <div class="view-header"
                     style="position: absolute; top:0; left:0; right:0; z-index: 10; background: transparent; padding-top: 1rem;">
@@ -891,7 +1258,7 @@
             </div>
         </section>
 
-        <section id="desk-view-arch3d" class="desk-view">
+        <section id="desk-view-arch3d" class="desk-view" data-lenis-prevent>
             <div class="desk-detail-container">
                 <div class="view-header">
                     <button onclick="NavDesk('desk-home-view')" class="btn-volver">← Volver al inicio</button>
@@ -904,133 +1271,9 @@
                 </div>
             </div>
         </section>
-        <section id="desk-view-sobre" class="desk-view">
-            <div class="desk-detail-container">
-                <div class="view-header">
-                    <button onclick="NavDesk('desk-home-view')" class="btn-volver">← Volver al inicio</button>
-                    <h2>Sobre Nosotros</h2>
-                </div>
-                <div class="view-body desk-sobre-body">
-                    <div class="desk-sobre-grid">
-                        <div class="desk-sobre-photo">
-                            <img src="equipo.webp" alt="Equipo PuntoZero" class="team-photo"/>
-                        </div>
-                        <div class="desk-sobre-text">
-                            <p style="margin-bottom:2rem;">Somos un estudio de ingeniería de software fundado en Córdoba con vocación global. Aplicamos el máximo rigor técnico para entregar soluciones digitales rápidas, seguras y sin complejidad innecesaria. Cada proyecto que asumimos es tratado con la misma exigencia que aplicaríamos a infraestructura crítica.</p>
-                            <div class="team-grid">
-                                <div class="team-member">
-                                    <h4>Dirección & Desarrollo</h4>
-                                    <p>Especialista en arquitectura digital y desarrollo full-stack. Responsable de cada línea de código que sale del estudio.</p>
-                                </div>
-                                <div class="team-member">
-                                    <h4>Diseño & Experiencia de Usuario</h4>
-                                    <p>Convierte la complejidad técnica en interfaces elegantes e intuitivas. Garantiza que cada producto sea tan fácil de usar como potente.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
 
-        <section id="desk-view-contacto" class="desk-view">
-            <div class="desk-contacto-container">
-                <button onclick="NavDesk('desk-home-view')" class="btn-volver-contacto">← Volver al inicio</button>
-                <div class="proceso-section proceso-section-desk">
-                    <p class="proceso-label">Cómo trabajamos</p>
-                    <div class="proceso-grid proceso-grid-desk">
-                        <div class="proceso-step proceso-step-desk">
-                            <span class="paso-num">01</span>
-                            <div>
-                                <h4>Cuéntanos tu idea</h4>
-                                <p>Una llamada rápida para entender tu negocio, tus objetivos y el problema real a resolver.</p>
-                            </div>
-                        </div>
-                        <div class="proceso-step proceso-step-desk">
-                            <span class="paso-num">02</span>
-                            <div>
-                                <h4>Demo en 48 horas</h4>
-                                <p>Un prototipo funcional con tu marca y tus datos. Sin compromiso, sin adelantos.</p>
-                            </div>
-                        </div>
-                        <div class="proceso-step proceso-step-desk">
-                            <span class="paso-num">03</span>
-                            <div>
-                                <h4>Desplegamos y escalamos</h4>
-                                <p>Tu producto sale al mundo. Nos quedamos contigo para mejorarlo semana a semana.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="contacto-grid-50">
-                    <div class="contacto-left">
-                        <h2>El primer paso hacia la Ingeniería de Alto Rendimiento empieza con una conversación.</h2>
-                        <p>No dejes que la complejidad técnica te detenga. Cuéntame tu idea y busquemos juntos el PuntoZero de tu proyecto. Anímate a escribirme.</p>
-                    </div>
-                    <div class="contacto-right">
-                        <button class="btn-contacto-desk btn-wa-desk" onclick="enviarWhatsApp(this)" data-plan="Contacto General desde Web">Abrir Canal Directo (WhatsApp)</button>
-                        <a href="https://www.instagram.com/puntozero_sl" target="_blank" class="btn-contacto-desk btn-ig-desk">Sigue el Laboratorio (@puntozero_sl)</a>
-                    </div>
-                </div>
-            </div>
-        </section>
 
         <!-- Vista Ejemplos Desktop -->
-        <section id="desk-view-ejemplos" class="desk-view">
-            <div class="desk-detail-container">
-                <div class="view-header">
-                    <button onclick="NavDesk('desk-home-view')" class="btn-volver">← Volver al inicio</button>
-                    <h2>Ejemplos de Negocios</h2>
-                </div>
-                <div class="view-body">
-                    <p style="margin-bottom:1.5rem;">Demos funcionales para distintos tipos de negocio. Cada una resuelve un problema real del sector.</p>
-                    <div class="ej-buscador-wrap">
-                        <input type="search" class="ej-search-input" placeholder="¿Cuál es tu negocio? Ej: peluquería, restaurante, gimnasio…" oninput="filtrarEjemplos(this)" autocomplete="off" aria-label="Buscar ejemplo por tipo de negocio">
-                    <div class="ejemplos-grid-v2 ejemplos-grid-v2-desk">
-                        <a href="https://barberq.puntozerosl.es/" target="_blank" class="ej-card" data-kw="peluqueria peluquero corte de pelo afeitado salon de barberos barba hombre" style="--ej-color:#f59e0b"><div class="ej-top"><span class="ej-emoji">✂️</span></div><p class="ej-sector">Barbería</p><h4 class="ej-nombre">BarberQ</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://garagetrack.puntozerosl.es/" target="_blank" class="ej-card" data-kw="taller mecanico coches automoviles reparacion de coches vehiculos neumaticos revision" style="--ej-color:#3b82f6"><div class="ej-top"><span class="ej-emoji">🔧</span></div><p class="ej-sector">Taller mecánico</p><h4 class="ej-nombre">GarageTrack</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://dentaflow.puntozerosl.es/" target="_blank" class="ej-card" data-kw="dentista clinica dental odontologia dientes ortodoncia salud bucal" style="--ej-color:#06b6d4"><div class="ej-top"><span class="ej-emoji">🦷</span></div><p class="ej-sector">Clínica dental</p><h4 class="ej-nombre">DentaFlow</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://fitsched.puntozerosl.es/" target="_blank" class="ej-card" data-kw="gimnasio gym fitness entrenamiento personal deporte pesas clases" style="--ej-color:#a855f7"><div class="ej-top"><span class="ej-emoji">💪</span></div><p class="ej-sector">Gimnasio</p><h4 class="ej-nombre">FitSched</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://tableflow.puntozerosl.es/" target="_blank" class="ej-card" data-kw="restaurante bar cafeteria hosteleria reservas de mesas comida cocina" style="--ej-color:#f97316"><div class="ej-top"><span class="ej-emoji">🍽️</span></div><p class="ej-sector">Restaurante</p><h4 class="ej-nombre">TableFlow</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://propfinder.puntozerosl.es/" target="_blank" class="ej-card" data-kw="inmobiliaria pisos casas alquiler venta de viviendas propiedades agencia inmobiliaria" style="--ej-color:#10b981"><div class="ej-top"><span class="ej-emoji">🏠</span></div><p class="ej-sector">Inmobiliaria</p><h4 class="ej-nombre">PropFinder</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://vetflow.puntozerosl.es/" target="_blank" class="ej-card" data-kw="veterinaria veterinario mascotas animales perros gatos clinica veterinaria citas" style="--ej-color:#22c55e"><div class="ej-top"><span class="ej-emoji">🐾</span></div><p class="ej-sector">Veterinaria</p><h4 class="ej-nombre">VetFlow</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://glowbook.puntozerosl.es/" target="_blank" class="ej-card" data-kw="estetica spa salon de belleza manicura masajes unas tratamientos faciales" style="--ej-color:#f472b6"><div class="ej-top"><span class="ej-emoji">💅</span></div><p class="ej-sector">Estética & Spa</p><h4 class="ej-nombre">GlowBook</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://cleantrack.puntozerosl.es/" target="_blank" class="ej-card" data-kw="tintoreria lavanderia limpieza de ropa tintorerias planchado lavado en seco" style="--ej-color:#38bdf8"><div class="ej-top"><span class="ej-emoji">👔</span></div><p class="ej-sector">Tintorería</p><h4 class="ej-nombre">CleanTrack</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://fixnow.puntozerosl.es/" target="_blank" class="ej-card" data-kw="fontanero electricista cerrajero urgencias del hogar reparaciones mantenimiento averias" style="--ej-color:#ef4444"><div class="ej-top"><span class="ej-emoji">🚨</span></div><p class="ej-sector">Urgencias hogar</p><h4 class="ej-nombre">FixNow</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://techhub.puntozerosl.es/" target="_blank" class="ej-card" data-kw="informatica reparacion de moviles ordenadores tecnologia soporte tecnico electronica" style="--ej-color:#0ea5e9"><div class="ej-top"><span class="ej-emoji">💻</span></div><p class="ej-sector">Informática</p><h4 class="ej-nombre">TechHub</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://threadshop.puntozerosl.es/" target="_blank" class="ej-card" data-kw="tienda de ropa moda boutique accesorios complementos" style="--ej-color:#f43f5e"><div class="ej-top"><span class="ej-emoji">👗</span></div><p class="ej-sector">Moda & Accesorios</p><h4 class="ej-nombre">ThreadShop</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://paperco.puntozerosl.es/" target="_blank" class="ej-card" data-kw="papeleria libreria manualidades material escolar arte regalos" style="--ej-color:#f59e0b"><div class="ej-top"><span class="ej-emoji">📓</span></div><p class="ej-sector">Papelería & Arte</p><h4 class="ej-nombre">PaperCo</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://boxfit.puntozerosl.es/" target="_blank" class="ej-card" data-kw="boxeo crossfit entrenamiento funcional artes marciales gimnasio de boxeo" style="--ej-color:#dc2626"><div class="ej-top"><span class="ej-emoji">🥊</span></div><p class="ej-sector">Gimnasio funcional</p><h4 class="ej-nombre">BoxFit</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://folio.puntozerosl.es/" target="_blank" class="ej-card" data-kw="portfolio diseñador freelance fotografo artista creativo agencia creativa" style="--ej-color:#8b5cf6"><div class="ej-top"><span class="ej-emoji">🎨</span></div><p class="ej-sector">Portfolio digital</p><h4 class="ej-nombre">Folio</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://bloomq.puntozerosl.es/" target="_blank" class="ej-card" data-kw="floristeria flores ramos plantas regalos florales entrega de flores a domicilio" style="--ej-color:#ec4899"><div class="ej-top"><span class="ej-emoji">🌸</span></div><p class="ej-sector">Floristería</p><h4 class="ej-nombre">BloomQ</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://crusthub.puntozerosl.es/" target="_blank" class="ej-card" data-kw="panaderia pasteleria reposteria pan artesano tartas dulces bolleria masa madre" style="--ej-color:#d97706"><div class="ej-top"><span class="ej-emoji">🥐</span></div><p class="ej-sector">Panadería & Pastelería</p><h4 class="ej-nombre">CrustHub</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://drivesched.puntozerosl.es/" target="_blank" class="ej-card" data-kw="autoescuela carnet de conducir clases practicas examen de conducir teorico" style="--ej-color:#2563eb"><div class="ej-top"><span class="ej-emoji">🚗</span></div><p class="ej-sector">Autoescuela</p><h4 class="ej-nombre">DriveSched</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://zenflow.puntozerosl.es/" target="_blank" class="ej-card" data-kw="yoga pilates meditacion estudio de yoga bienestar relajacion clases" style="--ej-color:#84cc16"><div class="ej-top"><span class="ej-emoji">🧘</span></div><p class="ej-sector">Yoga & Pilates</p><h4 class="ej-nombre">ZenFlow</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://lenspoint.puntozerosl.es/" target="_blank" class="ej-card" data-kw="optica gafas lentillas graduacion revision visual monturas oculista" style="--ej-color:#06b6d4"><div class="ej-top"><span class="ej-emoji">👓</span></div><p class="ej-sector">Óptica</p><h4 class="ej-nombre">LensPoint</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://goldline.puntozerosl.es/" target="_blank" class="ej-card" data-kw="joyeria joyas anillos collares pulseras relojeria orfebreria oro" style="--ej-color:#eab308"><div class="ej-top"><span class="ej-emoji">💍</span></div><p class="ej-sector">Joyería</p><h4 class="ej-nombre">GoldLine</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://tripnest.puntozerosl.es/" target="_blank" class="ej-card" data-kw="agencia de viajes vacaciones escapadas turismo vuelos hoteles reservas" style="--ej-color:#0ea5e9"><div class="ej-top"><span class="ej-emoji">✈️</span></div><p class="ej-sector">Agencia de viajes</p><h4 class="ej-nombre">TripNest</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://gelatohub.puntozerosl.es/" target="_blank" class="ej-card" data-kw="heladeria helados gelato postres heladeria artesanal sorbetes" style="--ej-color:#f472b6"><div class="ej-top"><span class="ej-emoji">🍦</span></div><p class="ej-sector">Heladería artesanal</p><h4 class="ej-nombre">GelatoHub</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://inkroom.puntozerosl.es/" target="_blank" class="ej-card" data-kw="tatuajes estudio de tatuajes tinta piercing tatuador disenos" style="--ej-color:#ef4444"><div class="ej-top"><span class="ej-emoji">🖋️</span></div><p class="ej-sector">Estudio de tatuajes</p><h4 class="ej-nombre">InkRoom</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://physiocore.puntozerosl.es/" target="_blank" class="ej-card" data-kw="fisioterapia rehabilitacion lesiones recuperacion fisio masajes terapeuticos" style="--ej-color:#14b8a6"><div class="ej-top"><span class="ej-emoji">🩺</span></div><p class="ej-sector">Fisioterapia</p><h4 class="ej-nombre">PhysioCore</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://hophouse.puntozerosl.es/" target="_blank" class="ej-card" data-kw="cerveceria microcerveceria artesanal cerveza craft beer barril pub bar de cervezas" style="--ej-color:#f59e0b"><div class="ej-top"><span class="ej-emoji">🍺</span></div><p class="ej-sector">Microcervecería</p><h4 class="ej-nombre">HopHouse</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://fernly.puntozerosl.es/" target="_blank" class="ej-card" data-kw="vivero plantas de interior jardineria floristeria macetas decoracion verde" style="--ej-color:#3f6b4f"><div class="ej-top"><span class="ej-emoji">🌿</span></div><p class="ej-sector">Vivero urbano</p><h4 class="ej-nombre">Fernly</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://roastnote.puntozerosl.es/" target="_blank" class="ej-card" data-kw="cafeteria tostadero de cafe cafe de especialidad torrefaccion grano cafe artesanal" style="--ej-color:#9a3412"><div class="ej-top"><span class="ej-emoji">☕</span></div><p class="ej-sector">Tostadero de café</p><h4 class="ej-nombre">RoastNote</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://waypoint.puntozerosl.es/" target="_blank" class="ej-card" data-kw="gasolinera estacion de servicio combustible carburante area de servicio repostaje gasoleo" style="--ej-color:#f5a623"><div class="ej-top"><span class="ej-emoji">⛽</span></div><p class="ej-sector">Área de servicio</p><h4 class="ej-nombre">WayPoint</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://domio.puntozerosl.es/" target="_blank" class="ej-card" data-kw="electrodomesticos tienda de electrodomesticos lavadoras frigorificos television climatizacion hogar" style="--ej-color:#0e7490"><div class="ej-top"><span class="ej-emoji">🔌</span></div><p class="ej-sector">Electrodomésticos</p><h4 class="ej-nombre">Domio</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://solhaven.puntozerosl.es/" target="_blank" class="ej-card" data-kw="hotel hotel boutique alojamiento turismo rural escapadas habitaciones reservas hospedaje" style="--ej-color:#c9914c"><div class="ej-top"><span class="ej-emoji">🏨</span></div><p class="ej-sector">Hotel boutique</p><h4 class="ej-nombre">Solhaven</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://farmaciavelilla.puntozerosl.es/" target="_blank" class="ej-card" data-kw="farmacia botica medicamentos parafarmacia farmacia de guardia salud recetas vacunacion" style="--ej-color:#1f9d6f"><div class="ej-top"><span class="ej-emoji">💊</span></div><p class="ej-sector">Farmacia</p><h4 class="ej-nombre">Farmacia Velilla</h4><span class="ej-btn">Ver demo</span></a>
-                        <a href="https://funerariaalba.puntozerosl.es/" target="_blank" class="ej-card" data-kw="funeraria tanatorio servicios funerarios velatorio ceremonias acompañamiento" style="--ej-color:#7c8b76"><div class="ej-top"><span class="ej-emoji">🕊️</span></div><p class="ej-sector">Funeraria</p><h4 class="ej-nombre">Funeraria Alba</h4><span class="ej-btn">Ver demo</span></a>
-                    </div>
-                        <p class="ej-no-results" hidden>No tenemos todavía una demo para ese tipo de negocio, pero podemos crear una a tu medida. <a href="#" onclick="NavDesk('desk-view-contacto'); return false;">Hablemos →</a></p>
-                    </div>
-                    <div style="margin-top:2rem;">
-                        <button onclick="NavDesk('desk-view-contacto')" class="btn-cta-full" style="max-width:360px;">
-                            ¿Quieres algo así para tu negocio? →
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
     </div>
 
     <!-- Modal Contenedor -->
@@ -1046,7 +1289,10 @@
     </div>
 
     <!-- Script principal con la lógica condicional -->
+    <script src="js/logo3d.js"></script>
     <script src="js/main.js"></script>
+    <!-- Animaciones de la portada con scroll (solo escritorio) -->
+    <script src="js/home.js"></script>
 </body>
 
 </html>

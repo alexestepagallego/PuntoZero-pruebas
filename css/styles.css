@@ -2050,3 +2050,480 @@ button {
         display: none;
     }
 }
+/* =========================================================================
+   PORTADA CON SCROLL (escritorio, >=1024px)
+   -------------------------------------------------------------------------
+   La portada era un panel a pantalla completa con overflow:hidden. Ahora es
+   un recorrido vertical. Las vistas de detalle (cartas, web, 3D, arch3D)
+   siguen siendo paneles, pero pasan a position:fixed porque el documento ya
+   no mide una pantalla: en absolute se quedarían clavadas arriba del todo.
+   ========================================================================= */
+@media (min-width: 1024px) {
+
+    #desktop-app {
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+    }
+
+    /* El logo 3D acompaña todo el recorrido en vez de irse con el hero. */
+    #canvas-container {
+        position: fixed;
+        pointer-events: none;
+    }
+
+    .desk-nav {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        /* Opaca de más a propósito: por detrás pasa el logo 3D y con un fondo
+           muy translúcido su reflejo especular se colaba como un manchón gris
+           justo sobre el menú. */
+        background: rgba(10, 10, 10, .72);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-bottom: 1px solid rgba(255, 255, 255, .06);
+        transition: padding .35s cubic-bezier(.22, 1, .36, 1),
+                    background-color .35s ease;
+    }
+
+    .desk-nav.pz-nav-compacta {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        background: rgba(8, 8, 8, .92);
+    }
+
+    #desk-scroll {
+        position: relative;
+        z-index: 10;
+        display: block;
+    }
+
+    .pz-sec {
+        position: relative;
+        display: block;
+        width: 100%;
+        padding: 8rem 5%;
+        box-sizing: border-box;
+    }
+
+    .pz-hero {
+        min-height: calc(100vh - 6rem);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding-top: 0;
+        pointer-events: none;
+    }
+
+    .pz-hero .clients-strip-desk { display: none; }
+
+    /* Las secciones movidas traían contenedores pensados para un panel. */
+    .pz-sec .desk-detail-container,
+    .pz-sec .desk-services-container,
+    .pz-sec .desk-contacto-container {
+        max-width: 1180px;
+        margin: 0 auto;
+        height: auto;
+        overflow: visible;
+    }
+
+    .pz-sec .btn-volver,
+    .pz-sec .btn-volver-desk { display: none; }
+
+    .pz-sec-label {
+        font-size: .72rem;
+        letter-spacing: .34em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, .42);
+        margin: 0 0 1.6rem;
+        text-align: center;
+    }
+
+    /* --- Pista de scroll del hero --- */
+    .pz-scroll-hint {
+        position: absolute;
+        left: 50%;
+        bottom: 2.5rem;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: .7rem;
+        color: rgba(255, 255, 255, .45);
+        font-size: .68rem;
+        letter-spacing: .3em;
+        text-transform: uppercase;
+    }
+
+    .pz-scroll-mouse {
+        width: 20px;
+        height: 33px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.5;
+    }
+
+    .pz-scroll-mouse circle { fill: currentColor; stroke: none; }
+
+    /* --- Cinta de clientes --- */
+    .pz-sec-cinta { padding: 5rem 0; overflow: hidden; }
+
+    .pz-marquee {
+        display: flex;
+        width: max-content;
+        will-change: transform;
+        /* Se difumina en los bordes para que no "aparezca" de golpe. */
+        mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+        -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+    }
+
+    .pz-mq-track {
+        display: flex;
+        align-items: center;
+        gap: 2.5rem;
+        padding-right: 2.5rem;
+        flex: 0 0 auto;
+    }
+
+    .pz-mq-item {
+        font-size: clamp(1.8rem, 3.4vw, 3.2rem);
+        font-weight: 800;
+        letter-spacing: -.03em;
+        white-space: nowrap;
+        color: rgba(255, 255, 255, .18);
+        transition: color .4s ease;
+    }
+
+    .pz-marquee:hover .pz-mq-item { color: rgba(255, 255, 255, .34); }
+    .pz-mq-sep { color: rgba(255, 255, 255, .12); font-size: 1.2rem; }
+
+    /* --- Paneles de detalle: ahora fijos --- */
+    #desktop-app .desk-view {
+        position: fixed;
+        inset: 0;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 60;
+    }
+
+    body.pz-panel-abierto { overflow: hidden; }
+
+    /* --- Titular con palabra acentuada --- */
+    .pz-acento {
+        position: relative;
+        display: inline-block;
+    }
+
+    /* --- Subrayado dibujado --- */
+    .pz-trazo {
+        display: block;
+        width: 100%;
+        max-width: 320px;
+        height: 12px;
+        margin-top: .9rem;
+        overflow: visible;
+    }
+
+    .pz-trazo path {
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 3;
+        stroke-linecap: round;
+        opacity: .85;
+    }
+
+    /* --- Micro-etiquetas editoriales --- */
+    .ej-meta {
+        display: block;
+        margin-top: .55rem;
+        font-size: .6rem;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, .35);
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* Elementos que revela GSAP: ocultos de salida, pero solo si hay JS y
+       movimiento permitido (si no, se ven siempre; nunca contenido invisible). */
+    .pz-js.pz-anim .pz-reveal { opacity: 0; will-change: transform, opacity; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pz-marquee { mask-image: none; -webkit-mask-image: none; }
+    .pz-scroll-hint { display: none; }
+}
+
+/* --- Hueco de la cabecera donde aterriza el logo del loader (ver js/loader.js) --- */
+@media (min-width: 1024px) {
+    .desk-logo {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .desk-logo-marca {
+        display: inline-flex;
+        width: 1.5em;
+        height: 1.5em;
+        margin-right: .6em;
+        flex: 0 0 auto;
+    }
+
+    .desk-logo-marca #pz-logo {
+        width: 100%;
+        height: 100%;
+        color: currentColor;
+        visibility: visible;
+        position: relative;
+    }
+}
+
+/* La cabecera es sticky: sin este margen, al saltar a una sección el titular
+   queda por debajo de ella. */
+@media (min-width: 1024px) {
+    .pz-sec { scroll-margin-top: 6.5rem; }
+}
+
+/* =========================================================================
+   SOBRE NOSOTROS: LÍNEA TEMPORAL HORIZONTAL
+   -------------------------------------------------------------------------
+   El punto de partida es una tira que se desplaza de lado con el propio dedo
+   o la rueda (overflow-x: auto). Solo cuando js/home.js confirma que puede
+   anclar la sección, le pone .pz-tl-anclada y pasa a moverse con el scroll
+   vertical. Así, si falla GSAP o el usuario pide reducir movimiento, los
+   hitos siguen siendo accesibles en vez de quedar cortados.
+   ========================================================================= */
+@media (min-width: 1024px) {
+
+    .pz-sec-sobre {
+        padding-left: 0;
+        padding-right: 0;
+        overflow: hidden;
+    }
+
+    .pz-tl-cabecera {
+        max-width: 1180px;
+        margin: 0 auto 3.5rem;
+        padding: 0 5%;
+    }
+
+    .pz-tl-intro {
+        color: rgba(255, 255, 255, .55);
+        font-size: 1.05rem;
+        max-width: 46ch;
+        margin-top: 1.2rem;
+    }
+
+    .pz-tl-viewport {
+        position: relative;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: thin;
+        padding-bottom: 1rem;
+    }
+
+    /* Ya anclada, el desplazamiento lo lleva GSAP: se corta el nativo para que
+       no compitan los dos. */
+    .pz-tl-anclada .pz-tl-viewport {
+        overflow: hidden;
+        padding-bottom: 0;
+    }
+
+    .pz-tl-rail {
+        position: absolute;
+        top: 108px;
+        left: 0;
+        height: 1px;
+        width: 100%;
+        background: rgba(255, 255, 255, .12);
+    }
+
+    .pz-tl-rail-lleno {
+        display: block;
+        height: 100%;
+        width: 0;
+        background: linear-gradient(90deg, rgba(255,255,255,.65), rgba(120,180,255,.9));
+        box-shadow: 0 0 12px rgba(120, 180, 255, .5);
+    }
+
+    .pz-tl-track {
+        display: flex;
+        align-items: flex-start;
+        gap: 3.5rem;
+        margin: 0;
+        padding: 0 5%;
+        list-style: none;
+        width: max-content;
+        will-change: transform;
+    }
+
+    .pz-tl-hito {
+        position: relative;
+        flex: 0 0 auto;
+        width: 340px;
+        padding-top: 132px;   /* deja pasar el raíl por encima */
+    }
+
+    .pz-tl-punto {
+        position: absolute;
+        top: 103px;
+        left: 0;
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: #0a0a0a;
+        border: 2px solid rgba(255, 255, 255, .55);
+        transition: border-color .35s ease, box-shadow .35s ease, background-color .35s ease;
+    }
+
+    .pz-tl-hito.pz-tl-visto .pz-tl-punto {
+        background: #7ab4ff;
+        border-color: #7ab4ff;
+        box-shadow: 0 0 16px rgba(122, 180, 255, .75);
+    }
+
+    .pz-tl-num {
+        position: absolute;
+        top: 46px;
+        left: 0;
+        font-size: 2.6rem;
+        font-weight: 800;
+        letter-spacing: -.04em;
+        color: rgba(255, 255, 255, .16);
+        font-variant-numeric: tabular-nums;
+        transition: color .4s ease;
+    }
+
+    .pz-tl-hito.pz-tl-visto .pz-tl-num { color: rgba(255, 255, 255, .42); }
+
+    .pz-tl-foto {
+        margin: 0 0 1.4rem;
+        border-radius: 12px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, .04);
+        aspect-ratio: 4 / 3;
+    }
+
+    .pz-tl-foto img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        will-change: transform;
+    }
+
+    /* Hueco a la espera de foto: se ve que falta, no simula contenido. */
+    .pz-tl-foto--vacia {
+        display: grid;
+        place-items: center;
+        border: 1px dashed rgba(255, 255, 255, .18);
+        background: rgba(255, 255, 255, .02);
+    }
+
+    .pz-tl-foto--vacia span {
+        font-size: .68rem;
+        letter-spacing: .28em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, .3);
+    }
+
+    .pz-tl-hito h3 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin: 0 0 .7rem;
+        color: #fff;
+    }
+
+    .pz-tl-hito p {
+        font-size: .95rem;
+        line-height: 1.65;
+        color: rgba(255, 255, 255, .62);
+        margin: 0;
+    }
+
+    .pz-tl-hito p strong { color: rgba(255, 255, 255, .9); font-weight: 600; }
+
+    /* La línea temporal trae su propio subrayado; el genérico sobraría. */
+    .pz-sec-sobre .pz-tl-cabecera h2 .pz-trazo { max-width: 240px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pz-tl-rail-lleno { width: 100% !important; }
+}
+
+/* =========================================================================
+   BUSCADOR DE EJEMPLOS: RESULTADOS BAJO DEMANDA
+   -------------------------------------------------------------------------
+   Antes se pintaban las 33 demos de golpe. Ahora la rejilla arranca oculta y
+   solo aparece tras buscar, con la marca dibujándose mientras tanto.
+   Se oculta desde .pz-js: sin JavaScript nadie podría hacerlas aparecer, así
+   que en ese caso se ven todas como antes.
+   ========================================================================= */
+.pz-js .ej-buscador-wrap .ejemplos-grid-v2 { display: none; }
+.pz-js .ej-buscador-wrap.ej-con-resultados .ejemplos-grid-v2 { display: grid; }
+
+.ej-estado {
+    display: none;
+    padding: 2.2rem 0 1rem;
+    text-align: center;
+}
+
+.pz-js .ej-estado { display: block; }
+.pz-js .ej-buscador-wrap.ej-con-resultados .ej-estado { display: none; }
+
+.ej-vacio {
+    color: rgba(255, 255, 255, .48);
+    font-size: .98rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.ej-vacio span {
+    display: block;
+    margin-top: .7rem;
+    font-size: .74rem;
+    letter-spacing: .12em;
+    color: rgba(255, 255, 255, .26);
+}
+
+.ej-buscador-wrap.ej-buscando .ej-vacio { display: none; }
+
+.ej-cargando {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* El display:flex de arriba pisaría el atributo hidden (los estilos de autor
+   ganan a los del navegador), y el bloque de carga se vería siempre. */
+.ej-cargando[hidden] { display: none; }
+
+.ej-cargando-marca {
+    width: 62px;
+    height: 62px;
+    color: #fff;
+}
+
+.ej-cargando-marca svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    display: block;
+}
+
+.ej-cargando-txt {
+    margin: 0;
+    font-size: .72rem;
+    letter-spacing: .28em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, .42);
+}
+
+/* En claro (la vista móvil usa fondo oscuro, pero por si acaso) */
+@media (prefers-color-scheme: light) {
+    .ej-cargando-marca { color: inherit; }
+}
